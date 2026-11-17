@@ -75,7 +75,15 @@ Conclusiones y consecuencias:
 | Cobertura de reactivos de recetas | **463 de 589 (78,6 %)** tienen al menos una publicación |
 | Cobertura de productos de recetas | 467 de 2.301 (20,3 %) en commodities; es esperable que el resto sea equipo, que va en `/auctions/{casa}` (cobertura combinada sin medir) |
 
-Los 126 reactivos sin publicación (21,4 %) pueden ser ítems de vendedor, poco comerciados o ausentes esa hora; **no está medido**. Para los de vendedor, `purchase_price` del ítem da el precio.
+Desglose de los 126 reactivos sin publicación (21,4 %):
+
+| Grupo | Reactivos | Fuente de precio |
+|-------|----------:|------------------|
+| Con `purchase_price` > 0 (se compran a vendedor) | 73 | Precio de vendedor del ítem |
+| Sin ítem en `static-forever` (404) | 22 | Ninguna por ahora |
+| Sin publicación ni precio de vendedor | 31 | Ninguna por ahora (raros, no comerciados esa hora, o de drop/BoP) |
+
+Sumando subasta y vendedor, **536 de 589 reactivos (91,0 %)** tienen una fuente de precio en esta casa; **53 (9,0 %)** no. Esos 53 requieren override manual (RF-PRI-03) o precios de otras casas/horas, y la UI debe marcarlos «sin precio». Cálculo hecho con una sola casa y una sola lectura; un vendedor puede tener existencias limitadas que `purchase_price` no refleja.
 
 Sigue **sin verificar**: la forma exacta de cada entrada de commodities (se espera `unit_price`; los resúmenes están en `auction-summary.json`), que las subastas sean idénticas entre rulesets (solo se comparó el índice de casas), la cadencia real (repetir cada hora), los demás valores de `time_left`, y la cobertura en las otras 14 casas.
 
