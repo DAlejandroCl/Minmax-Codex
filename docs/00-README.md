@@ -1,6 +1,6 @@
 # Wiki Forever — Documentación de planificación (SDLC)
 
-> **Estado:** Borrador v0.1 · **Fecha:** 2026-11-16 · **Autor:** Diego (DevACL) · **Fase SDLC:** 0–1 (Descubrimiento y Análisis)
+> **Estado:** v0.2 (MVP y ADRs aprobados) · **Fecha:** 2026-11-16 · **Autor:** Diego (DevACL) · **Fase SDLC:** 0–1 (Descubrimiento y Análisis)
 > Nombre de trabajo: **Wiki Forever** (puede cambiar).
 
 Web app fullstack e interactiva para **World of Warcraft: Forever**: armory conectado a tus personajes, profesiones, talentos, listas BiS y guía de subida de profesiones al **menor costo posible**, con la meta a largo plazo de convertirse en una **wiki por clase** orientada al *min-maxing*.
@@ -19,6 +19,7 @@ Web app fullstack e interactiva para **World of Warcraft: Forever**: armory cone
 | 08 | [Riesgos](08-riesgos.md) | Registro de riesgos y mitigaciones |
 | 09 | [Roadmap y backlog](09-roadmap-y-backlog.md) | Fases, épicas, historias iniciales |
 | 10 | [Calidad y DevOps](10-calidad-y-devops.md) | Testing, CI/CD, Definition of Done |
+| 11 | [Justificación de decisiones de ingeniería](11-justificacion-de-decisiones-de-ingenieria.md) | ¿Por qué cada decisión? Alternativas, trade-offs, condiciones de revisión |
 
 ## Convenciones
 
