@@ -4,9 +4,9 @@
 
 | ID | Pregunta | Estado | Documento | Siguiente paso |
 |----|----------|--------|-----------|----------------|
-| SP-1 | ¿Cómo obtener datos estáticos de forma reproducible y legítima? | **En curso**: la API sirve recetas y reactivos, pero la receta de ejemplo no trae umbrales ni fuentes (R-18, por confirmar) | [SP-01](SP-01-datos-estaticos.md) | `probe catalog` y `probe items` |
+| SP-1 | ¿Cómo obtener datos estáticos de forma reproducible y legítima? | **Medido**: 2.493 recetas con reactivos y 3,7 % de reactivos en 404; sin umbrales ni fuentes en ninguna (R-18 confirmado) | [SP-01](SP-01-datos-estaticos.md) | Probar más endpoints; decidir cómo cubrir el hueco (SP-4 + curación) |
 | SP-2 | ¿Qué cubre la API de personajes y qué solo un addon? | **Reorientado** | [SP-02](SP-02-personajes-api-vs-addon.md) | Comparar API vs addon con un personaje real |
-| SP-3 | ¿Cuál es la fuente primaria de precios? | **Parcialmente validado**: 4 rulesets y 15 casas confirmados; falta forma de una casa y cadencia | [SP-03](SP-03-precios.md) | `probe auction --compare --house=110`; decidir ADR-013 |
+| SP-3 | ¿Cuál es la fuente primaria de precios? | **Casi validado**: 4 rulesets × 15 casas; casa real de 96.465 subastas y 5.295 ítems; falta detalle de campos y cadencia | [SP-03](SP-03-precios.md) | Detallar campos; medir cadencia cada hora; decidir ADR-013 |
 | SP-4 | ¿Cómo se calcula el skill-up por color? | **Guía lista** (requiere medición en el juego) | [SP-04](SP-04-skillup.md) | Muestreo in-game |
 | SP-5 | ¿El optimizador iguala/mejora guías publicadas? | **Bloqueado** por SP-1 y SP-4 | — | — |
 | SP-6 | ¿Astro + islas o SPA? | Pendiente | — | Prototipo de una página de entidad + calculadora |
