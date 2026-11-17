@@ -1,6 +1,6 @@
 # SP-3 · Fuente primaria de precios
 
-**Estado:** investigado (sin validar con llamadas propias) · **Fecha:** 2026-11-16 · **Riesgos:** R-04, R-16, R-17
+**Estado:** índice de casas validado con llamadas propias (2026-11-17); falta descargar una casa y comparar rulesets · **Riesgos:** R-04, R-16, R-17
 
 ## 1. Pregunta
 ¿De dónde obtener precios de subasta fiables y frescos para la calculadora de profesiones?
@@ -35,5 +35,23 @@ Escaneos in-game de usuarios (addon) y override manual (RF-PRI-03) siguen siendo
 ## 5. Recomendación
 Adoptar **API oficial como fuente primaria de precios** (propuesta ADR-013), con override manual y escaneo por addon como respaldo.
 
-## 6. Cómo validarlo
-`pnpm --filter @wow-forever/api-probe probe` prueba el índice de rulesets y el de casas (no descarga las casas completas). Criterio de salida: respuesta 200 del índice de casas con tus credenciales y confirmación de 15 casas.
+## 6. Resultados de la sonda propia (2026-11-17, región `us`)
+
+| Hecho verificado | Detalle |
+|------------------|---------|
+| Índice de rulesets | 200; ids **1, 2, 3 y 15** (cuatro, no tres como suponían las notas comunitarias) |
+| Índice de casas del ruleset 2 | 200 con la barra final; **15 casas**: ids 110–121 y 123–125 (sin 122) |
+| Reparto | 5 «Alliance Auction House» (110, 111, 112, 119, 123), 5 «Horde» (113, 114, 115, 120, 124) y 5 «Blackwater» (116, 117, 118, 121, 125) |
+
+Sigue **sin verificar por nosotros**: tamaño y forma de una casa, campos de cada subasta (`buyout`, `unit_price`, `time_left`), si `/commodities` existe, cadencia de actualización, y si los rulesets 1, 3 y 15 listan las mismas casas (la afirmación «el ruleset no filtra» solo está respaldada por informes).
+
+## 7. Cómo validarlo
+
+```bash
+git pull && pnpm install
+pnpm --filter @wow-forever/api-probe probe auction --compare --house=110
+```
+
+Descarga el índice de casas de los 4 rulesets y **una** casa (≈ 10 MB, guardada en `out/`). `auction-summary.json` incluye: forma de la respuesta, campos y rangos numéricos, nº de subastas e ítems distintos, y las cabeceras `Last-Modified`/`Date`/`Cache-Control` (sirven para estimar la cadencia). Para medir la cadencia, repite la llamada con una hora de diferencia y compara `Last-Modified`.
+
+Criterio de salida: forma de la subasta documentada, identidad de casas entre rulesets confirmada o refutada, y cadencia medida.
