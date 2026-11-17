@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   countKeys,
   createClient,
+  itemCoverage,
   parseArgs,
   qualifyNamespace,
   recipeItemIds,
@@ -102,6 +103,18 @@ test("summarizeAuctionPayload sin array devuelve cero entradas", () => {
   const summary = summarizeAuctionPayload({ code: 404 });
   assert.equal(summary.count, 0);
   assert.equal(summary.arrayKey, null);
+});
+
+test("itemCoverage cuenta ítems de recetas con publicaciones", () => {
+  const body = { auctions: [{ item: { id: 1 } }, { item: { id: 1 } }, { item: { id: 3 } }] };
+  const coverage = itemCoverage(body, { reagents: [1, 2], crafted: [3, 4, 5, 6] });
+  assert.deepEqual(coverage.reagents, { total: 2, withListing: 1, pct: 50 });
+  assert.deepEqual(coverage.crafted, { total: 4, withListing: 1, pct: 25 });
+});
+
+test("itemCoverage tolera respuesta vacía e ids ausentes", () => {
+  const coverage = itemCoverage({}, undefined);
+  assert.deepEqual(coverage.reagents, { total: 0, withListing: 0, pct: 0 });
 });
 
 test("createClient devuelve cuerpo, estado y cabeceras", async () => {
