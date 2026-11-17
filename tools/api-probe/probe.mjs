@@ -10,6 +10,7 @@
  *   pnpm --filter @wow-forever/api-probe probe items                 # cobertura de ítems
  *   pnpm --filter @wow-forever/api-probe probe auction --compare     # casas por ruleset
  *   pnpm --filter @wow-forever/api-probe probe auction --house=110   # una casa (≈ 10 MB)
+ *   pnpm --filter @wow-forever/api-probe probe auction --commodities # solo /commodities de la casa 110
  *   pnpm --filter @wow-forever/api-probe probe -- --ns=dynamic-forever --path=/data/wow/ruleset/index
  *
  * Opciones: --limit=N (probar con pocas recetas/ítems), --profession=ID, --ruleset=ID,
@@ -27,6 +28,7 @@ import {
   countKeys,
   createClient,
   fetchToken,
+  itemCoverage,
   parseArgs,
   recipeItemIds,
   recipeRefs,
@@ -317,7 +319,8 @@ async function runAuction() {
   const dir = join(OUT, `auction-${stamp()}`);
   await mkdir(dir, { recursive: true });
   const summary = { region, generatedAt: new Date().toISOString(), compare: [], house: null };
-  const wantsHouse = flags.house !== undefined || flags.compare === undefined;
+  const wantsHouse =
+    flags.house !== undefined || (flags.compare === undefined && flags.commodities === undefined);
 
   if (flags.compare !== undefined) {
     for (const rs of ["1", "2", "3", "15"]) {
@@ -343,31 +346,40 @@ async function runAuction() {
     }
   }
 
-  if (wantsHouse) {
-    const ruleset = flags.ruleset ?? "2";
-    const house = flags.house ?? "110";
-    const res = await get(DYNAMIC, `/data/wow/ruleset/${ruleset}/auctions/${house}`);
-    summary.house = {
+  const wantsCommodities = flags.commodities !== undefined;
+  const itemIds = await readJson(join(OUT, "catalog", "item-ids.json"));
+  const ruleset = flags.ruleset ?? "2";
+  const house = flags.house ?? "110";
+
+  /** Descarga una variante de la casa, la guarda y devuelve su descripción. */
+  async function describeHouse(label, suffix) {
+    const res = await get(DYNAMIC, `/data/wow/ruleset/${ruleset}/auctions/${house}${suffix}`);
+    if (res.body) {
+      await saveJson(join(dir, `ruleset-${ruleset}-house-${house}${label}.json`), res.body, false);
+    }
+    const analysis = res.body ? summarizeAuctionPayload(res.body) : null;
+    const coverage = res.body && itemIds ? itemCoverage(res.body, itemIds) : null;
+    console.log(
+      `casa ${house}${suffix} (ruleset ${ruleset}): HTTP ${res.status}, ${res.bytes} bytes`,
+    );
+    if (analysis) console.log({ count: analysis.count, distinctItems: analysis.distinctItems });
+    if (coverage) console.log("cobertura de ítems de recetas:", coverage);
+    return {
       ruleset,
       house,
+      suffix,
       status: res.status,
       bytes: res.bytes,
       headers: res.headers,
       note: res.note,
-      analysis: res.body ? summarizeAuctionPayload(res.body) : null,
+      analysis,
+      coverage,
     };
-    if (res.body)
-      await saveJson(join(dir, `ruleset-${ruleset}-house-${house}.json`), res.body, false);
-    console.log(
-      `casa ${house} (ruleset ${ruleset}): HTTP ${res.status}, ${res.bytes} bytes`,
-      res.headers,
-      summary.house.analysis
-        ? {
-            count: summary.house.analysis.count,
-            distinctItems: summary.house.analysis.distinctItems,
-          }
-        : "",
-    );
+  }
+
+  if (wantsHouse || wantsCommodities) {
+    if (wantsHouse) summary.house = await describeHouse("", "");
+    if (wantsCommodities) summary.commodities = await describeHouse("-commodities", "/commodities");
   }
   await saveJson(join(dir, "auction-summary.json"), summary);
   console.log(`\nResumen: ${join(dir, "auction-summary.json")}`);
