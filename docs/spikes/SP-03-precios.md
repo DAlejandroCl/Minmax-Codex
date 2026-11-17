@@ -1,6 +1,6 @@
 # SP-3 · Fuente primaria de precios
 
-**Estado:** índice de casas validado con llamadas propias (2026-11-17); falta descargar una casa y comparar rulesets · **Riesgos:** R-04, R-16, R-17
+**Estado:** casas, rulesets y una casa real validados con llamadas propias (2026-11-17); falta el detalle de campos y la cadencia · **Riesgos:** R-04, R-16, R-17
 
 ## 1. Pregunta
 ¿De dónde obtener precios de subasta fiables y frescos para la calculadora de profesiones?
@@ -24,7 +24,7 @@ Todo esto proviene de terceros sobre una API **no documentada**: puede cambiar s
 ## 3. Implicaciones para el diseño
 
 1. **La clave de mercado es la casa de subastas (facción/grupo), no el ruleset.** `price_snapshot.market` pasa a `auction_house_id` (+ región). Se corrige el modelo de [05](../05-modelo-de-dominio-y-datos.md) cuando se apruebe ADR-013.
-2. **Volumen real:** ≈ 1.500 ítems distintos por casa × 15 casas × 24 lecturas/día ≈ 540.000 filas/día si se guardara cada observación (estimación con una sola muestra; validar). Con ~60 B/fila serían ≈ 32 MB/día: el límite gratuito de 500 MB se agota en ≈ 2 semanas → **la política de ADR-012 sigue siendo necesaria** y debe reducirse a "último estado por (casa, ítem) + agregados diarios".
+2. **Volumen real (medido en una casa):** una casa trae ≈ 96.000 subastas y ≈ 5.300 ítems distintos (más que los ≈ 1.500 del informe comunitario). Si las demás casas se parecen (no verificado), una lectura de las 15 casas son ≈ 1,4 millones de subastas y ≈ 140 MB de JSON; guardar un precio por (casa, ítem, hora) serían ≈ 80.000 filas/lectura y ≈ 1,9 millones/día. El límite gratuito de 500 MB se agota en pocos días → **la política de ADR-012 sigue siendo necesaria** y debe reducirse a "último estado por (casa, ítem) + agregados diarios". Además, solo importan los ≈ 2.700 ítems de recetas, no los 5.300: filtrar al ingerir reduce el volumen a la mitad.
 3. **Ingesta:** un job horario descarga 15 casas (hasta ≈ 150 MB/h) y reduce a (ítem, casa) → mínimo, mediana y cantidad. Debe ejecutarse en GitHub Actions, no en funciones (límite de 4,5 MB por petición/respuesta en Vercel Functions).
 4. **Nombres de ítems incompletos:** la capa de presentación debe tolerar ítems sin nombre (mostrar ID y marcar "sin resolver").
 5. **Términos de la API:** límite de retención y de uso (ver [SP-07](SP-07-legal.md)) condicionan qué se puede guardar y por cuánto tiempo.
@@ -43,7 +43,16 @@ Adoptar **API oficial como fuente primaria de precios** (propuesta ADR-013), con
 | Índice de casas del ruleset 2 | 200 con la barra final; **15 casas**: ids 110–121 y 123–125 (sin 122) |
 | Reparto | 5 «Alliance Auction House» (110, 111, 112, 119, 123), 5 «Horde» (113, 114, 115, 120, 124) y 5 «Blackwater» (116, 117, 118, 121, 125) |
 
-Sigue **sin verificar por nosotros**: tamaño y forma de una casa, campos de cada subasta (`buyout`, `unit_price`, `time_left`), si `/commodities` existe, cadencia de actualización, y si los rulesets 1, 3 y 15 listan las mismas casas (la afirmación «el ruleset no filtra» solo está respaldada por informes).
+### Comparación de rulesets y una casa real (2026-11-17)
+
+| Hecho verificado | Detalle |
+|------------------|---------|
+| Índice de casas por ruleset | Los rulesets 1, 2, 3 y 15 responden 200 y listan **15 casas con el mismo reparto** (5 Alliance, 5 Horde, 5 Blackwater) |
+| Casa 110 (ruleset 2) | 200; ≈ 9,5 MB de JSON (se transfiere con gzip); **96.465 subastas** y **5.295 ítems distintos** |
+| Cabeceras | `Last-Modified: 21:25:03 GMT`, `Cache-Control: public, max-age=86400`, `Content-Encoding: gzip` |
+| Cadencia | Dos descargas con 12 min de diferencia devolvieron el **mismo** `Last-Modified`: los datos no cambiaron en ese lapso. `max-age=86400` es una pista de caché, no la frecuencia de actualización |
+
+Sigue **sin verificar**: que las subastas sean idénticas entre rulesets (solo se comparó el índice de casas), la cadencia real (hay que repetir cada hora), el detalle de los campos de cada subasta (`buyout`, `unit_price`, `time_left`) y la existencia de `/commodities`. El detalle de campos está en `auction-summary.json` (`house.analysis`).
 
 ## 7. Cómo validarlo
 
