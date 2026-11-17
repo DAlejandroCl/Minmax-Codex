@@ -87,10 +87,11 @@ wiki-forever/
 | API | **Node 22 + Express 5** | Stack del autor |
 | Validación | **Zod** | Contratos únicos entre capas |
 | BD | **PostgreSQL** | Relacional con jsonb para datos semiestructurados |
-| Acceso a datos | Ver ADR-007 (abierta) | |
+| Acceso a datos | **Drizzle ORM** + drizzle-kit | Tipado inferido del esquema y SQL visible (ADR-007) |
 | Pruebas | **Vitest** (+ fast-check), **Playwright**, **axe-core** | Estándar del autor; accesibilidad automática |
 | CI/CD | **GitHub Actions** | Ya usado |
-| Hosting | Vercel (web), servicio Node para API/jobs, Supabase u otro Postgres | Ver ADR-008 |
+| Hosting | Vercel (web + API), GitHub Actions programadas (ETL/jobs), PostgreSQL gestionado (Supabase) | Costo ≈ 0 y poca operación (ADR-008) |
+| Autenticación | **Supabase Auth** (JWT verificado en Express) | Evita implementar credenciales propias (ADR-009) |
 | Monorepo | **pnpm + Turborepo** | Ya usado; caché de tareas |
 
 ## 6. Diseño de API (borrador)
@@ -145,17 +146,22 @@ Logs estructurados con `requestId`; métricas de ETL (filas, rechazos, duración
 
 ## 10. Registro de decisiones (ADRs)
 
+> La evaluación de alternativas, consecuencias y condiciones de revisión de cada ADR está en [11 · Justificación de decisiones de ingeniería](11-justificacion-de-decisiones-de-ingenieria.md).
+
 | ID | Decisión | Estado |
 |----|----------|--------|
-| ADR-001 | Monorepo pnpm + Turborepo | **Propuesta** (consistente con el portafolio) |
-| ADR-002 | Conectar personajes por **exportación de addon + importación de archivo**; integración oficial condicionada | **Propuesta** |
-| ADR-003 | `optimizer` como paquete puro compartido; ejecución en Web Worker | **Propuesta** |
-| ADR-004 | Astro (SSG) + islas React para contenido público; app interactiva en React | **Propuesta — validar en SP-6** |
-| ADR-005 | Datos de juego versionados por build y servidos como artefactos estáticos | **Propuesta** |
+| ADR-001 | Monorepo pnpm + Turborepo | **Aceptada** |
+| ADR-002 | Conectar personajes por **exportación de addon + importación de archivo**; integración oficial condicionada | **Aceptada** |
+| ADR-003 | `optimizer` como paquete puro compartido; ejecución en Web Worker | **Aceptada** |
+| ADR-004 | Astro (SSG) + islas React para contenido público; app interactiva en React | **Aceptada — condicionada a SP-6** |
+| ADR-005 | Datos de juego versionados por build y servidos como artefactos estáticos | **Aceptada** |
 | ADR-006 | Dinero como entero en cobre | **Aceptada** (RN-02) |
-| ADR-007 | Acceso a datos: Sequelize (familiar) vs Drizzle/Kysely (mejor tipado, SQL explícito) | **Abierta** |
-| ADR-008 | Hosting de API/jobs y BD (límites de tiers gratuitos) | **Abierta** |
-| ADR-009 | Autenticación: proveedor gestionado vs propia; Battle.net OAuth solo como identidad opcional | **Abierta** |
+| ADR-007 | Acceso a datos: **Drizzle ORM** | **Aceptada** |
+| ADR-008 | Hosting: Vercel (web + API) + GitHub Actions (jobs) + PostgreSQL gestionado | **Aceptada** (verificar Express en Vercel en Fase 0) |
+| ADR-009 | Autenticación: **Supabase Auth**; Battle.net OAuth diferido a R5 | **Aceptada** |
+| ADR-010 | Optimizador: camino más corto en DAG de segmentos | **Aceptada** |
+| ADR-011 | Parser Lua propio sin evaluación | **Aceptada** |
+| ADR-012 | Retención y agregación de precios (30 días crudos + agregados) | **Aceptada** |
 
 ### ADR-002 (detalle)
 
