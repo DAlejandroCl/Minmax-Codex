@@ -1,0 +1,11 @@
+node_modules/
+dist/
+coverage/
+.turbo/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+# Salidas de los spikes (pueden contener datos de personajes o tokens)
+tools/**/out/
+.DS_Store
