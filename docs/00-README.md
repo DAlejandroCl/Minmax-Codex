@@ -20,6 +20,7 @@ Web app fullstack e interactiva para **World of Warcraft: Forever**: armory cone
 | 09 | [Roadmap y backlog](09-roadmap-y-backlog.md) | Fases, épicas, historias iniciales |
 | 10 | [Calidad y DevOps](10-calidad-y-devops.md) | Testing, CI/CD, Definition of Done |
 | 11 | [Justificación de decisiones de ingeniería](11-justificacion-de-decisiones-de-ingenieria.md) | ¿Por qué cada decisión? Alternativas, trade-offs, condiciones de revisión |
+| — | [Spikes de la Fase 0](spikes/README.md) | Informes y guías de SP-1…SP-7 |
 
 ## Convenciones
 
@@ -31,8 +32,10 @@ Web app fullstack e interactiva para **World of Warcraft: Forever**: armory cone
 
 ## Hallazgo clave que condiciona todo el plan
 
-A fecha de este documento **no hay evidencia de una API pública de Blizzard para personajes ni subasta de WoW Forever** (ver [07](07-fuentes-de-datos-y-viabilidad.md)). El ecosistema actual conecta personajes mediante **addons que exportan `SavedVariables`**. Por eso el plan:
+> **Actualizado en Fase 0 (2026-11-16):** la versión inicial de este documento decía que no existía API de Blizzard para Forever. **Ya existe**, aunque sin documentación oficial: datos estáticos, perfiles de personaje y subastas (desde el 5–7 de noviembre). Ver [07](07-fuentes-de-datos-y-viabilidad.md), los [spikes](spikes/README.md) y la propuesta ADR-013 (pendiente de aprobación).
+
+La API de Forever es **no documentada** y sus Términos limitan la retención de datos y la monetización ([SP-07](spikes/SP-07-legal.md)). Por eso el plan:
 
 1. entrega valor **sin necesidad de conectar personajes** desde el MVP (calculadora de profesiones y base de datos),
-2. conecta personajes por **importación de datos exportados por addon**, y
-3. deja la integración oficial como una mejora condicionada a que Blizzard la exponga.
+2. propone **API-first con addon como complemento y respaldo** (ADR-013, pendiente de aprobación; ADR-002 sigue vigente mientras tanto), y
+3. aísla la API tras una capa con contratos probados, porque puede cambiar sin aviso.
