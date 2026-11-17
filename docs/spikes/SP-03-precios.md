@@ -63,11 +63,21 @@ Adoptar **API oficial como fuente primaria de precios** (propuesta ADR-013), con
 
 Conclusiones y consecuencias:
 
-- Este endpoint trae **publicaciones individuales** (cantidad 1). Los materiales apilables (paños, hierbas, minerales) probablemente están en **`/commodities`**, que en un informe comunitario trae `unit_price`; **no lo hemos probado**. Sin él, los precios de reactivos podrían faltar: es la siguiente medición (`probe auction --commodities`, que además calcula qué porcentaje de los reactivos de recetas tiene publicación).
+- Este endpoint trae **publicaciones individuales** (cantidad 1). Los materiales apilables están en **`/commodities`** (ver abajo).
 - El precio de un ítem debe calcularse como el mínimo de `buyout` **filtrando por variante** (sin `bonus_lists`/`modifiers`) para productos comunes; para equipo con bonos hace falta un criterio aparte (fuera del MVP).
 - Las subastas solo-puja (`buyout` ausente) se ignoran para el costo.
 
-Sigue **sin verificar**: que las subastas sean idénticas entre rulesets (solo se comparó el índice de casas), la cadencia real (repetir cada hora), los demás valores de `time_left`, y `/commodities`.
+### `/auctions/{casa}/commodities` (casa 110, 2026-11-17)
+
+| Hecho verificado | Detalle |
+|------------------|---------|
+| Existe | 200; ≈ 7,3 MB; **84.286 publicaciones** y **1.308 ítems distintos** |
+| Cobertura de reactivos de recetas | **463 de 589 (78,6 %)** tienen al menos una publicación |
+| Cobertura de productos de recetas | 467 de 2.301 (20,3 %) en commodities; es esperable que el resto sea equipo, que va en `/auctions/{casa}` (cobertura combinada sin medir) |
+
+Los 126 reactivos sin publicación (21,4 %) pueden ser ítems de vendedor, poco comerciados o ausentes esa hora; **no está medido**. Para los de vendedor, `purchase_price` del ítem da el precio.
+
+Sigue **sin verificar**: la forma exacta de cada entrada de commodities (se espera `unit_price`; los resúmenes están en `auction-summary.json`), que las subastas sean idénticas entre rulesets (solo se comparó el índice de casas), la cadencia real (repetir cada hora), los demás valores de `time_left`, y la cobertura en las otras 14 casas.
 
 ## 7. Cómo validarlo
 
