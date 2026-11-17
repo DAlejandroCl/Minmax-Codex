@@ -1,0 +1,184 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {
+  countKeys,
+  createClient,
+  parseArgs,
+  qualifyNamespace,
+  recipeItemIds,
+  recipeRefs,
+  summarizeAuctionPayload,
+  tierRefs,
+  toNumber,
+} from "./lib.mjs";
+
+const noSleep = async () => {};
+
+function fakeResponse(status, body, headers = {}) {
+  const lower = Object.fromEntries(Object.entries(headers).map(([k, v]) => [k.toLowerCase(), v]));
+  return {
+    status,
+    ok: status >= 200 && status < 300,
+    headers: { get: (name) => lower[name.toLowerCase()] ?? null },
+    text: async () => (typeof body === "string" ? body : JSON.stringify(body)),
+  };
+}
+
+test("parseArgs ignora el -- literal y separa modo y banderas", () => {
+  const { flags, positional } = parseArgs(["catalog", "--", "--limit=10", "--compare"]);
+  assert.deepEqual(positional, ["catalog"]);
+  assert.deepEqual(flags, { limit: "10", compare: "true" });
+});
+
+test("parseArgs conserva '=' dentro del valor", () => {
+  const { flags } = parseArgs(["--path=/data/x?a=b"]);
+  assert.equal(flags.path, "/data/x?a=b");
+});
+
+test("toNumber usa el valor por defecto si no es numérico", () => {
+  assert.equal(toNumber(undefined, 5), 5);
+  assert.equal(toNumber("abc", 5), 5);
+  assert.equal(toNumber("12", 5), 12);
+});
+
+test("qualifyNamespace no duplica la región", () => {
+  assert.equal(qualifyNamespace("static-forever", "us"), "static-forever-us");
+  assert.equal(
+    qualifyNamespace("static-1.60.1_70399-forever-us", "us"),
+    "static-1.60.1_70399-forever-us",
+  );
+});
+
+test("countKeys cuenta rutas anidadas y arrays", () => {
+  const counts = countKeys(
+    [
+      { id: 1, reagents: [{ reagent: { id: 2 }, quantity: 1 }] },
+      { id: 2, skill: 5 },
+    ],
+    { depth: 2 },
+  );
+  assert.equal(counts.id, 2);
+  assert.equal(counts.skill, 1);
+  assert.equal(counts["reagents[].reagent"], 1);
+  assert.equal(counts["reagents[].quantity"], 1);
+});
+
+test("tierRefs y recipeRefs toleran datos ausentes", () => {
+  assert.deepEqual(tierRefs({}), []);
+  assert.deepEqual(tierRefs({ skill_tiers: [{ id: 1, name: "A" }] }), [{ id: 1, name: "A" }]);
+  assert.deepEqual(recipeRefs(undefined), []);
+  assert.deepEqual(
+    recipeRefs({ categories: [{ name: "C", recipes: [{ id: 9, name: "R" }] }, {}] }),
+    [{ id: 9, name: "R", category: "C" }],
+  );
+});
+
+test("recipeItemIds separa reactivos y producto", () => {
+  const ids = recipeItemIds({
+    crafted_item: { id: 10 },
+    reagents: [{ reagent: { id: 1 }, quantity: 2 }, { reagent: {} }],
+  });
+  assert.deepEqual(ids, { reagents: [1], crafted: [10] });
+  assert.deepEqual(recipeItemIds({}), { reagents: [], crafted: [] });
+});
+
+test("summarizeAuctionPayload describe la forma y rangos", () => {
+  const summary = summarizeAuctionPayload({
+    _links: {},
+    auctions: [
+      { id: 1, item: { id: 100 }, quantity: 2, buyout: 500 },
+      { id: 2, item: { id: 100 }, quantity: 1, buyout: 300 },
+      { id: 3, item: { id: 200 }, quantity: 5 },
+    ],
+  });
+  assert.equal(summary.arrayKey, "auctions");
+  assert.equal(summary.count, 3);
+  assert.equal(summary.distinctItems, 2);
+  assert.deepEqual(summary.numericRanges.buyout, { min: 300, max: 500, count: 2 });
+  assert.equal(summary.sample.length, 3);
+});
+
+test("summarizeAuctionPayload sin array devuelve cero entradas", () => {
+  const summary = summarizeAuctionPayload({ code: 404 });
+  assert.equal(summary.count, 0);
+  assert.equal(summary.arrayKey, null);
+});
+
+test("createClient devuelve cuerpo, estado y cabeceras", async () => {
+  const calls = [];
+  const get = createClient({
+    host: "https://example.test",
+    region: "us",
+    token: "t",
+    sleep: noSleep,
+    fetchImpl: async (url, init) => {
+      calls.push({ url: String(url), auth: init.headers.Authorization });
+      return fakeResponse(200, { ok: true }, { "Last-Modified": "x" });
+    },
+  });
+  const res = await get("static-forever", "/data/wow/item/1");
+  assert.equal(res.status, 200);
+  assert.deepEqual(res.body, { ok: true });
+  assert.equal(res.headers["last-modified"], "x");
+  assert.match(calls[0].url, /namespace=static-forever-us/);
+  assert.equal(calls[0].auth, "Bearer t");
+});
+
+test("createClient reintenta ante 429 y luego tiene éxito", async () => {
+  let n = 0;
+  const waits = [];
+  const get = createClient({
+    host: "https://example.test",
+    region: "us",
+    token: "t",
+    sleep: async (ms) => {
+      waits.push(ms);
+    },
+    fetchImpl: async () => {
+      n += 1;
+      return n === 1 ? fakeResponse(429, "", { "Retry-After": "2" }) : fakeResponse(200, { a: 1 });
+    },
+  });
+  const res = await get("static-forever", "/x");
+  assert.equal(res.status, 200);
+  assert.equal(n, 2);
+  assert.ok(waits.includes(2000));
+});
+
+test("createClient devuelve 404 sin reintentar y marca respuestas no JSON", async () => {
+  let n = 0;
+  const get = createClient({
+    host: "https://example.test",
+    region: "us",
+    token: "t",
+    sleep: noSleep,
+    fetchImpl: async () => {
+      n += 1;
+      return fakeResponse(404, "no es json");
+    },
+  });
+  const res = await get("static-forever", "/x");
+  assert.equal(res.status, 404);
+  assert.equal(res.body, null);
+  assert.equal(res.note, "respuesta no JSON");
+  assert.equal(n, 1);
+});
+
+test("createClient agota reintentos ante error de red", async () => {
+  let n = 0;
+  const get = createClient({
+    host: "https://example.test",
+    region: "us",
+    token: "t",
+    maxRetries: 2,
+    sleep: noSleep,
+    fetchImpl: async () => {
+      n += 1;
+      throw new Error("caído");
+    },
+  });
+  const res = await get("static-forever", "/x");
+  assert.equal(res.status, 0);
+  assert.match(res.note, /caído/);
+  assert.equal(n, 3);
+});
