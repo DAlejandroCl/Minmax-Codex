@@ -9,7 +9,7 @@
 | Necesidad | Fuente candidata | Estado | Veredicto |
 |-----------|------------------|--------|-----------|
 | Recetas, ítems, razas, clases, profesiones | **API `static-forever`** (Battle.net) | Operativa desde el lanzamiento según informes comunitarios; ≈ 43 % de ítems de subasta dan 404; cobertura de reactivos y umbrales por medir | **Viable — verificar con SP-1** |
-| Trainers, vendors, umbrales de color, fuentes de obtención | API (por confirmar), curación editorial o in-game | Sin evidencia de que la API los incluya | **Pendiente SP-1/SP-4** |
+| Trainers, vendors, umbrales de color, fuentes de obtención | API (por confirmar), curación editorial o in-game | La sonda del 2026-11-17 no los encontró en la receta de ejemplo (R-18); falta confirmarlo con el catálogo completo | **Pendiente SP-1/SP-4** |
 | Datos extraídos de archivos del cliente | Archivos del cliente 1.60.1 | Riesgo con el EULA (sin leer) | **No recomendado** si la API alcanza ([SP-07](spikes/SP-07-legal.md)) |
 | Personajes (equipo, especializaciones, profesiones) | **API `profile-forever`** (token de usuario `wow.profile`) | Funciona según informes del 5–6 nov; consulta pública por nombre-apellido sin confirmar | **Viable — verificar con SP-2** |
 | Personajes: inventario/banco, datos de sesión | Addons exportadores + `SavedVariables` | Existen (Forever Armory, WFA Armory Exporter, ForeverDB Uploader) | **Complemento/respaldo (ADR-002)** |
