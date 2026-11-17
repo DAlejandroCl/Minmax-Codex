@@ -41,7 +41,8 @@
 | 009 | **Supabase Auth** (email/OAuth social); Battle.net OAuth diferido | Aceptada | **Resuelta** |
 | 010 | **Optimizador: camino más corto en DAG de segmentos** | Aceptada | Nueva |
 | 011 | **Parser Lua propio, sin evaluación** | Aceptada | Nueva |
-| 012 | **Retención y agregación de precios** | Aceptada | Nueva |
+| 012 | **Retención y agregación de precios** | Aceptada (en revisión por ADR-013) | Nueva |
+| 013 | **API-first con addon como complemento** | **Propuesta — pendiente de aprobación** | Nueva (2026-11-16) |
 
 ---
 
@@ -196,6 +197,26 @@
 - **Justificación**: el valor para el usuario está en el precio **vigente y su tendencia**, no en cada observación. La agregación reduce el almacenamiento en órdenes de magnitud sin afectar RF-PRI-02.
 - **Reversibilidad**: alta; si se migra a un plan con más almacenamiento se puede ampliar la retención.
 - **Revisar si**: SP-3 muestra volúmenes distintos o se necesitan series históricas más finas.
+- **Actualización 2026-11-16**: la clave de mercado real es la casa de subastas y el volumen estimado es de ≈ 540.000 filas/día (ver [SP-03](spikes/SP-03-precios.md)); además los Términos de la API limitan la retención a 30 días ([SP-07](spikes/SP-07-legal.md)). Se revisará junto con ADR-013.
+
+### ADR-013 · API-first con addon como complemento *(propuesta)*
+> **Estado: PROPUESTA — pendiente de aprobación del product owner.** ADR-002 sigue vigente hasta que se apruebe.
+
+- **Contexto (nuevo, 2026-11-16)**: ADR-002 se aprobó con la premisa de que no había API para Forever. Desde el 5–7 de noviembre, informes comunitarios documentan que la API de Battle.net sirve datos estáticos (`static-forever`), perfiles de personaje (`profile-forever`, con token de usuario `wow.profile`) y subastas (`dynamic-forever`, desde el 2026-11-06), **sin documentación oficial** ([SP-01](spikes/SP-01-datos-estaticos.md), [SP-02](spikes/SP-02-personajes-api-vs-addon.md), [SP-03](spikes/SP-03-precios.md)).
+- **Opciones**: (a) mantener ADR-002 tal cual (addon como vía principal); (b) **API-first, addon como complemento**; (c) solo API.
+- **Decisión propuesta**: (b).
+  - Datos estáticos y precios: ETL/jobs sobre la API oficial.
+  - Personajes: consulta por API (token de usuario o consulta pública si funciona) y **addon/archivo para lo que la API no da** (se define en SP-02) y como respaldo si la API cambia.
+  - RF-PRI-05 (integración oficial de subasta) pasa de *Could/R5* a **Must/MVP**; RF-PRI-04 (escaneo por addon) queda como respaldo.
+- **Justificación**: la API es la fuente más fiable, fresca y de menor fricción para el usuario (sin instalar addon ni subir archivos), y evita los riesgos legales de extraer datos del cliente. Mantener el addon como complemento conserva independencia si Blizzard cambia o restringe la API (R-17).
+- **Consecuencias**:
+  - (+) Precios horarios oficiales, datos estáticos sin extracción, menos fricción de usuario.
+  - (−) Dependencia de una API **no documentada** y de los Términos (retención de 30 días, sin *premium*, sin scraping; ver SP-07).
+  - Requiere **vincular Battle.net (OAuth)** para listar los personajes del usuario → ADR-009 pasaría a: *Supabase Auth para identidad + flujo de vinculación Battle.net con almacenamiento cifrado del token*.
+  - ADR-005 y ADR-012 se ajustan: refresco de artefactos y retención ≤ 30 días hasta confirmar el alcance de la regla.
+  - El modelo de mercado cambia de `ruleset` a `auction_house_id` ([05](05-modelo-de-dominio-y-datos.md)).
+- **Reversibilidad**: alta (ADR-002 sigue siendo el plan B funcional).
+- **Revisar si**: Blizzard publica documentación oficial, restringe los endpoints o aclara los Términos.
 
 ---
 
