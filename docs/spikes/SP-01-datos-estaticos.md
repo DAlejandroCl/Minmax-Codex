@@ -17,7 +17,7 @@ La propuesta original era extraer datos de archivos del cliente. Desde el lanzam
 | Recetas | **2.493 únicas**, todas descargadas, 0 fallos |
 | Reactivos | 8.419 líneas de reactivo (`reagent` + `quantity`) en 2.493 recetas; todas las recetas traen `reagents` |
 | Producto | `crafted_item` en 2.310 de 2.493; las otras 183 no producen un ítem (p. ej. encantamientos). `crafted_quantity.value` en 2.484; `minimum`/`maximum` en 9 recetas |
-| Otros campos | `description` en 300 recetas; `rank` en 210 (significado por confirmar: ¿rango del hechizo?); `media`, `_links` |
+| Otros campos | `description` en 300 recetas; `rank` en 210 (las tres primeras muestras son recetas de IDs altos, p. ej. 52639 «Fish Bowl», con `rank: 1` y una `description` «Craft a …», y producen ítems de ID ≥ 279960; parecen recetas nuevas de Forever con rangos, pero la distribución de valores no está medida); `media`, `_links` |
 
 ### 2.2 Cobertura de ítems (`probe items`)
 
@@ -71,6 +71,6 @@ Recomendación provisional: **F primero** (barato), luego **A + B** combinadas, 
 - **La API cambia o se restringe** → los artefactos por build ya generados siguen sirviéndose; se revisa ADR-005.
 
 ## 6. Pendiente
-- Confirmar qué significa `rank` y si distingue rangos de una misma receta.
+- Medir la distribución de `rank` y confirmar si distingue rangos de una misma receta o si son recetas nuevas de Forever.
 - Probar endpoints adicionales (NPC, vendedor, zona, spell) con `--path`.
 - Dataset de 1–2 profesiones generado por un ETL reproducible y 20 recetas verificadas contra el juego.
