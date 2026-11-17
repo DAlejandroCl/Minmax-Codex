@@ -1,23 +1,27 @@
 # 07 · Fuentes de datos y viabilidad
 
 > Investigación realizada el **2026-11-16**. WoW Forever lleva ~12 días en el mercado: **todo lo de esta página debe re-verificarse** antes de tomar decisiones irreversibles.
+>
+> **⚠ Corrección (2026-11-16, Fase 0):** la primera versión de este documento concluía que no había API de Blizzard para Forever (se basaba en una prueba del 2026-10-28, previa al lanzamiento). **Ya no es cierto**: desde el 5–7 de noviembre la API sirve datos estáticos, perfiles de personaje y subastas de Forever, aunque sin documentación oficial. Detalles y fuentes en [spikes/](spikes/README.md). La tabla de abajo está actualizada; las decisiones derivadas están en la propuesta [ADR-013](11-justificacion-de-decisiones-de-ingenieria.md#adr-013--api-first-con-addon-como-complemento-propuesta), pendiente de aprobación.
 
 ## 1. Resumen ejecutivo
 
 | Necesidad | Fuente candidata | Estado | Veredicto |
 |-----------|------------------|--------|-----------|
-| Recetas, ítems, trainers, umbrales de skill | Datos extraídos del cliente (build 1.60.1) | Otros sitios ya lo hacen; método y licitud por confirmar | **Viable, pendiente SP-1/SP-7** |
-| Personajes (equipo, talentos, profesiones) | Addons exportadores + `SavedVariables` | Existen (Forever Armory, WFA Armory Exporter, ForeverDB Uploader) | **Viable (ADR-002)** |
-| Personajes vía API de Blizzard | Battle.net Profile API | Sin evidencia de espacio de nombres para Forever | **No viable hoy; vigilar** |
-| Precios de subasta oficial | Battle.net Auction House API | Un proyecto comprobó el 2026-10-28 que no existía namespace de Forever; podría llegar sin listados, como en otras versiones | **No viable hoy; vigilar** |
-| Precios de subasta alternativos | Escaneos in-game de usuarios; feeds comunitarios | Ya usado por herramientas existentes | **Viable, calidad variable (SP-3)** |
+| Recetas, ítems, razas, clases, profesiones | **API `static-forever`** (Battle.net) | Operativa desde el lanzamiento según informes comunitarios; ≈ 43 % de ítems de subasta dan 404; cobertura de reactivos y umbrales por medir | **Viable — verificar con SP-1** |
+| Trainers, vendors, umbrales de color, fuentes de obtención | API (por confirmar), curación editorial o in-game | Sin evidencia de que la API los incluya | **Pendiente SP-1/SP-4** |
+| Datos extraídos de archivos del cliente | Archivos del cliente 1.60.1 | Riesgo con el EULA (sin leer) | **No recomendado** si la API alcanza ([SP-07](spikes/SP-07-legal.md)) |
+| Personajes (equipo, especializaciones, profesiones) | **API `profile-forever`** (token de usuario `wow.profile`) | Funciona según informes del 5–6 nov; consulta pública por nombre-apellido sin confirmar | **Viable — verificar con SP-2** |
+| Personajes: inventario/banco, datos de sesión | Addons exportadores + `SavedVariables` | Existen (Forever Armory, WFA Armory Exporter, ForeverDB Uploader) | **Complemento/respaldo (ADR-002)** |
+| Precios de subasta oficial | **API `dynamic-forever`**: 15 casas, actualización ≈ horaria | Disponible desde el 2026-11-06 ([SP-03](spikes/SP-03-precios.md)); mercado = casa de subastas, no ruleset | **Viable — validar con la sonda** |
+| Precios de subasta alternativos | Escaneos in-game de usuarios; override manual | Ya usado por herramientas existentes | **Respaldo** |
 | BiS / talentos recomendados | Curación editorial + datos de loot | Contenido humano necesario | **Viable, esfuerzo editorial** |
 
 ## 2. Hallazgos por tema
 
 ### 2.1 El juego
 - Lanzamiento el 4 de noviembre de 2026; versión de cliente 1.60.1; nivel máximo 60; incluido con la suscripción de WoW.
-- **Rulesets** (Normal, PvP, Roleplaying) reemplazan la elección tradicional de reino. Sin embargo, listados de la beta mostraban reinos con nombres propios: **confirmar cuál es la clave de mercado real** (ruleset, región, reino) antes de modelar `market`.
+- **Rulesets** (Normal, PvP, Roleplaying) reemplazan la elección tradicional de reino; en la API no hay reinos (el índice de reinos devuelve 404) y los personajes se identifican por nombre + apellido. **Actualizado:** la clave de mercado de precios es la **casa de subastas** (ver SP-03).
 - Instalación del cliente en carpeta tipo `_classic_beta_` (según notas de un addon); los addons usan APIs modernas (`C_QuestLog`, `C_Item`…) con *fallback* a las clásicas.
 - Los personajes requieren **nombre y apellido** (relevante para `character`).
 
@@ -32,8 +36,8 @@
 - Hay un *bug* conocido del cargador de `SavedVariables` en la beta que afecta a algunos addons: tratar el formato de datos como inestable.
 
 ### 2.4 Subasta / precios
-- La API de Blizzard para otras versiones expone subastas por reino conectado y *commodities* con actualización periódica (inicialmente horaria). Para Forever **no se encontró** espacio de nombres equivalente a fecha de investigación.
-- Otras versiones del juego sirven un índice de subasta sin listados: es posible que Forever se comporte igual.
+- **Actualizado 2026-11-16:** Battle.net sirve subastas de Forever desde el 2026-11-06 en `dynamic-forever-{región}` (15 casas, ≈ 9–10 MB por casa, ≈ horaria). El ruleset no filtra: el mercado es la casa. Ver [SP-03](spikes/SP-03-precios.md).
+- *(Dato histórico: el 2026-10-28 aún no existía el namespace; ver [goldbook #67](https://github.com/jkc-be/goldbook/issues/67).)*
 
 ## 3. Estrategia de datos
 
