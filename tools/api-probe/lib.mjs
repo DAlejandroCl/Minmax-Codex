@@ -113,6 +113,28 @@ export function summarizeAuctionPayload(body) {
   };
 }
 
+/**
+ * Cuántos de los ítems de recetas (`ids.reagents`, `ids.crafted`) tienen al menos una
+ * publicación en una respuesta de subasta.
+ */
+export function itemCoverage(body, ids) {
+  const arrayKey = Object.keys(body ?? {}).find((k) => Array.isArray(body[k]));
+  const listed = new Set();
+  for (const entry of arrayKey ? body[arrayKey] : []) {
+    const id = entry?.item?.id;
+    if (Number.isInteger(id)) listed.add(id);
+  }
+  const part = (list = []) => {
+    const withListing = list.filter((id) => listed.has(id)).length;
+    return {
+      total: list.length,
+      withListing,
+      pct: list.length ? Math.round((withListing / list.length) * 1000) / 10 : 0,
+    };
+  };
+  return { reagents: part(ids?.reagents), crafted: part(ids?.crafted) };
+}
+
 export async function fetchToken({ tokenUrl, id, secret, fetchImpl = fetch }) {
   const basic = Buffer.from(`${id}:${secret}`).toString("base64");
   const res = await fetchImpl(tokenUrl, {
