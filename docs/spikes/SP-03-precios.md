@@ -52,7 +52,22 @@ Adoptar **API oficial como fuente primaria de precios** (propuesta ADR-013), con
 | Cabeceras | `Last-Modified: 21:25:03 GMT`, `Cache-Control: public, max-age=86400`, `Content-Encoding: gzip` |
 | Cadencia | Dos descargas con 12 min de diferencia devolvieron el **mismo** `Last-Modified`: los datos no cambiaron en ese lapso. `max-age=86400` es una pista de caché, no la frecuencia de actualización |
 
-Sigue **sin verificar**: que las subastas sean idénticas entre rulesets (solo se comparó el índice de casas), la cadencia real (hay que repetir cada hora), el detalle de los campos de cada subasta (`buyout`, `unit_price`, `time_left`) y la existencia de `/commodities`. El detalle de campos está en `auction-summary.json` (`house.analysis`).
+### Forma de una subasta en `/auctions/{casa}` (casa 110, 96.465 entradas)
+
+| Campo | Presente en | Observación |
+|-------|------------:|-------------|
+| `id`, `item.id`, `quantity`, `time_left` | 96.465 (todas) | `quantity` vale **siempre 1**; `time_left` visto: `MEDIUM`, `LONG` (el resto de valores sin verificar) |
+| `buyout` | 96.463 | Entero en **cobre** (mín. 100, máx. 111.112.976): encaja con ADR-006 |
+| `bid` | 362 | Solo 362 subastas lo traen; 2 no tienen `buyout` (solo puja) |
+| `item.bonus_lists`, `item.context`, `item.modifiers` | 23.494 / 23.010 / 16.343 | Variantes de ítem (equipo con bonos); un mismo `item.id` puede tener precios muy distintos según estos campos |
+
+Conclusiones y consecuencias:
+
+- Este endpoint trae **publicaciones individuales** (cantidad 1). Los materiales apilables (paños, hierbas, minerales) probablemente están en **`/commodities`**, que en un informe comunitario trae `unit_price`; **no lo hemos probado**. Sin él, los precios de reactivos podrían faltar: es la siguiente medición (`probe auction --commodities`, que además calcula qué porcentaje de los reactivos de recetas tiene publicación).
+- El precio de un ítem debe calcularse como el mínimo de `buyout` **filtrando por variante** (sin `bonus_lists`/`modifiers`) para productos comunes; para equipo con bonos hace falta un criterio aparte (fuera del MVP).
+- Las subastas solo-puja (`buyout` ausente) se ignoran para el costo.
+
+Sigue **sin verificar**: que las subastas sean idénticas entre rulesets (solo se comparó el índice de casas), la cadencia real (repetir cada hora), los demás valores de `time_left`, y `/commodities`.
 
 ## 7. Cómo validarlo
 
