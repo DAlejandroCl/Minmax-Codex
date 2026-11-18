@@ -79,11 +79,13 @@ Desglose de los 126 reactivos sin publicación (21,4 %):
 
 | Grupo | Reactivos | Fuente de precio |
 |-------|----------:|------------------|
-| Con `purchase_price` > 0 (se compran a vendedor) | 73 | Precio de vendedor del ítem |
+| Con `purchase_price` > 0 | 73 | **No demostrado** que un vendedor los venda (ver corrección) |
 | Sin ítem en `static-forever` (404) | 22 | Ninguna por ahora |
-| Sin publicación ni precio de vendedor | 31 | Ninguna por ahora (raros, no comerciados esa hora, o de drop/BoP) |
+| Sin publicación y sin `purchase_price` | 31 | Ninguna por ahora (raros, no comerciados esa hora, o de drop/BoP) |
 
-Sumando subasta y vendedor, **536 de 589 reactivos (91,0 %)** tienen una fuente de precio en esta casa; **53 (9,0 %)** no. Esos 53 requieren override manual (RF-PRI-03) o precios de otras casas/horas, y la UI debe marcarlos «sin precio». Cálculo hecho con una sola casa y una sola lectura; un vendedor puede tener existencias limitadas que `purchase_price` no refleja.
+> **Corrección (2026-11-17):** una versión anterior de este documento afirmaba que los 73 de `purchase_price` > 0 «se compran a vendedor» y que 536 de 589 reactivos (91 %) tenían fuente de precio. **Esa inferencia no está respaldada:** `purchase_price` es el campo de precio de compra del ítem y puede ser > 0 aunque ningún NPC lo venda. La cifra sólida es la de subasta: **463 de 589 (78,6 %)** con publicación en una casa y una lectura. Hasta medirlo (`inspect:prices` compara ítems con y sin subasta), la API **no dice qué ítems vende un NPC**; eso entra en el hueco R-18.
+
+Los reactivos sin publicación requieren override manual (RF-PRI-03) o precios de otras casas/horas, y la UI debe marcarlos «sin precio». Cálculo con una sola casa y una sola lectura.
 
 Sigue **sin verificar**: la forma exacta de cada entrada de commodities (se espera `unit_price`; los resúmenes están en `auction-summary.json`), que las subastas sean idénticas entre rulesets (solo se comparó el índice de casas), la cadencia real (repetir cada hora), los demás valores de `time_left`, y la cobertura en las otras 14 casas.
 
