@@ -83,6 +83,25 @@ export function collapseLocales(value) {
 }
 
 /**
+ * Busca en un `preview_item` un requisito de habilidad del tipo «Requires Leatherworking (95)»
+ * (como texto `display_string` o dentro de `requirements.skill`). Devuelve { profession, level }
+ * o null.
+ */
+export function extractSkillRequirement(preview) {
+  if (!preview) return null;
+  const text = JSON.stringify(collapseLocales(preview));
+  const match = /Requires ([A-Za-z' ]+?) \((\d{1,3})\)/.exec(text);
+  if (match) return { profession: match[1], level: Number(match[2]) };
+  const skill = collapseLocales(preview)?.requirements?.skill;
+  if (skill && Number.isInteger(skill.level)) {
+    const profession =
+      typeof skill.profession === "object" ? skill.profession?.name : skill.profession;
+    return { profession: profession ?? null, level: skill.level };
+  }
+  return null;
+}
+
+/**
  * Enlaza ítems-patrón con recetas por nombre (sin el prefijo «Pattern:», «Plans:»…).
  * `patterns`: [{id, name}], `recipes`: [{id, name}].
  */
