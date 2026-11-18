@@ -2,12 +2,14 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { CANDIDATES, NAMESPACES } from "./candidates.mjs";
 import {
+  collapseLocales,
   countKeys,
   createClient,
   fillTemplate,
   findIndexList,
   hrefToPath,
   itemCoverage,
+  matchKey,
   matchPatternsToRecipes,
   normalizeName,
   parseArgs,
@@ -127,6 +129,29 @@ test("splitRecipeItemName separa el prefijo del nombre de la receta", () => {
 
 test("normalizeName ignora mayúsculas y espacios repetidos", () => {
   assert.equal(normalizeName("  Fine   Leather BOOTS "), "fine leather boots");
+});
+
+test("matchKey ignora puntuación y apóstrofes tipográficos", () => {
+  assert.equal(matchKey("Transmute: Iron to Gold"), matchKey("Transmute Iron to Gold"));
+  assert.equal(matchKey("Elixir of Ogre’s Strength"), matchKey("Elixir of Ogre's Strength"));
+  assert.equal(matchKey(undefined), "");
+});
+
+test("collapseLocales deja solo el texto en inglés", () => {
+  const value = {
+    name: { en_US: "Pattern", es_MX: "Patrón" },
+    n: 2,
+    list: [{ en_US: "x", de_DE: "y" }],
+  };
+  assert.deepEqual(collapseLocales(value), { name: "Pattern", n: 2, list: ["x"] });
+});
+
+test("matchPatternsToRecipes enlaza nombres con distinta puntuación", () => {
+  const result = matchPatternsToRecipes(
+    [{ id: 1, name: "Recipe: Transmute Iron to Gold" }],
+    [{ id: 9, name: "Transmute: Iron to Gold" }],
+  );
+  assert.equal(result.matched, 1);
 });
 
 test("matchPatternsToRecipes enlaza por nombre y reporta no enlazados y ambiguos", () => {
