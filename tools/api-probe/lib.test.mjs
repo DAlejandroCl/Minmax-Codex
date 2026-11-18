@@ -5,11 +5,13 @@ import {
   collapseLocales,
   countKeys,
   createClient,
+  extractPatternTarget,
   extractSkillRequirement,
   fillTemplate,
   findIndexList,
   hrefToPath,
   itemCoverage,
+  linkPatternsToRecipes,
   matchKey,
   matchPatternsToRecipes,
   normalizeName,
@@ -130,6 +132,53 @@ test("splitRecipeItemName separa el prefijo del nombre de la receta", () => {
 
 test("normalizeName ignora mayúsculas y espacios repetidos", () => {
   assert.equal(normalizeName("  Fine   Leather BOOTS "), "fine leather boots");
+});
+
+test("extractPatternTarget lee ítem fabricado, hechizo, reputación y ligadura", () => {
+  const preview = {
+    recipe: { item: { item: { id: 2307 } } },
+    spells: [{ spell: { name: "Enchant Bracer - Healing" } }],
+    requirements: { reputation: { display_string: "Requires Honor Hold - Friendly" } },
+    binding: { type: "ON_ACQUIRE" },
+  };
+  assert.deepEqual(extractPatternTarget(preview), {
+    craftedItemId: 2307,
+    spellName: "Enchant Bracer - Healing",
+    reputation: "Requires Honor Hold - Friendly",
+    binding: "ON_ACQUIRE",
+  });
+  assert.deepEqual(extractPatternTarget(undefined), {
+    craftedItemId: null,
+    spellName: null,
+    reputation: null,
+    binding: null,
+  });
+});
+
+test("linkPatternsToRecipes prioriza ítem fabricado, luego hechizo y luego nombre", () => {
+  const recipes = [
+    { id: 1, name: "Fine Leather Boots", craftedItemId: 2307 },
+    { id: 2, name: "Enchant Bracer - Healing" },
+    { id: 3, name: "Bolt of Linen" },
+  ];
+  const patterns = [
+    { id: 10, name: "Pattern: nombre distinto", craftedItemId: 2307 },
+    { id: 11, name: "Formula: x", spellName: "Enchant Bracer - Healing" },
+    { id: 12, name: "Pattern: Bolt of Linen" },
+    { id: 13, name: "Pattern: Nada" },
+  ];
+  const result = linkPatternsToRecipes(patterns, recipes);
+  assert.deepEqual(result.method, { item: 1, spell: 1, name: 1 });
+  assert.equal(result.recipesLinked, 3);
+  assert.deepEqual(result.unlinked, [{ id: 13, name: "Pattern: Nada" }]);
+  assert.deepEqual(
+    result.links.map((l) => [l.recipeId, l.patternId, l.how]),
+    [
+      [1, 10, "item"],
+      [2, 11, "spell"],
+      [3, 12, "name"],
+    ],
+  );
 });
 
 test("extractSkillRequirement lee el texto «Requires X (n)»", () => {
