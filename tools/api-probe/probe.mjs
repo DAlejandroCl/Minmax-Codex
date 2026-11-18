@@ -12,7 +12,7 @@
  *   pnpm --filter @wow-forever/api-probe probe auction --house=110   # una casa (≈ 10 MB)
  *   pnpm --filter @wow-forever/api-probe probe auction --commodities # solo /commodities de la casa 110
  *   pnpm --filter @wow-forever/api-probe probe discover              # endpoints candidatos por feature
- *   pnpm --filter @wow-forever/api-probe probe patterns              # ítems «Recipe» y enlace con recetas
+ *   pnpm --filter @wow-forever/api-probe probe patterns [--details]  # ítems «Recipe», enlace con recetas y requisito de habilidad
  *   pnpm --filter @wow-forever/api-probe probe -- --ns=dynamic-forever --path=/data/wow/ruleset/index
  *
  * Opciones: --limit=N (probar con pocas recetas/ítems), --profession=ID, --ruleset=ID,
@@ -31,6 +31,7 @@ import {
   collapseLocales,
   countKeys,
   createClient,
+  extractSkillRequirement,
   fetchToken,
   fillTemplate,
   findIndexList,
@@ -482,53 +483,64 @@ async function runDiscover() {
 }
 
 // ───────────────────────────── patterns (SP-1, hueco R-18) ─────────────────────────────
-/** Descarga todos los ítems de clase «Recipe» (id 9) y los enlaza con las recetas por nombre. */
+/**
+ * Descarga los ítems de clase «Recipe» (id 9) y los enlaza con las recetas por nombre.
+ * La búsqueda de la API devuelve como máximo 1.000 resultados, así que se consulta por subclase.
+ * Con `--details` pide además el detalle de cada patrón (resumible) para leer el requisito de
+ * habilidad de su `preview_item`; `--limit=N` acota cuántos.
+ */
 async function runPatterns() {
   const dir = join(OUT, "patterns");
-  await mkdir(dir, { recursive: true });
+  await mkdir(join(dir, "items"), { recursive: true });
   const pageSize = toNumber(flags["page-size"], 1000);
   const maxPages = toNumber(flags["max-pages"], 10);
-  const items = [];
-  const previews = [];
-  let page = 1;
-  let pageCount = 1;
-  let lastCount = 0;
-  let envelope = {};
-  // Sigue pidiendo páginas mientras la anterior venga llena, aunque `pageCount` diga 1
-  // (una página de exactamente `pageSize` ítems podría estar truncada por la API).
-  while (page <= maxPages && (page <= pageCount || lastCount === pageSize)) {
-    const res = await get(
-      STATIC,
-      `/data/wow/search/item?item_class.id=9&orderby=id&_pageSize=${pageSize}&_page=${page}`,
-    );
-    if (!ok(res)) {
-      console.log(`página ${page}: HTTP ${res.status} ${res.note}`);
-      break;
+
+  async function fetchPages(extra) {
+    const found = [];
+    for (let page = 1; page <= maxPages; page += 1) {
+      const res = await get(
+        STATIC,
+        `/data/wow/search/item?item_class.id=9${extra}&orderby=id&_pageSize=${pageSize}&_page=${page}`,
+      );
+      if (!ok(res)) {
+        console.log(`  página ${page}${extra}: HTTP ${res.status} ${res.note}`);
+        break;
+      }
+      const results = res.body.results ?? [];
+      for (const r of results) found.push(r.data ?? {});
+      if (results.length < pageSize) break;
     }
-    await saveJson(join(dir, `page-${page}.json`), res.body, false);
-    pageCount = res.body.pageCount ?? 1;
-    const { results, ...rest } = res.body;
-    envelope = rest;
-    lastCount = (results ?? []).length;
-    for (const r of results ?? []) {
-      const d = r.data ?? {};
-      if (d.preview_item) previews.push({ subclass: d.item_subclass?.name?.en_US, ...d });
-      items.push({
-        id: d.id,
-        name: d.name?.en_US,
-        classId: d.item_class?.id,
-        subclass: d.item_subclass?.name?.en_US,
-        level: d.level,
-        requiredLevel: d.required_level,
-        quality: d.quality?.type,
-        purchasePrice: d.purchase_price,
-        sellPrice: d.sell_price,
-      });
-    }
-    console.log(`  página ${page}/${pageCount}: ${items.length} ítems`);
-    page += 1;
+    return found;
   }
 
+  const classDetail = await get(STATIC, "/data/wow/item-class/9");
+  const subclasses = ok(classDetail) ? (classDetail.body.item_subclasses ?? []) : [];
+  const byId = new Map();
+  const cappedQueries = [];
+  const queries = subclasses.length
+    ? subclasses.map((s) => ({
+        label: `${s.id} ${collapseLocales(s.name)}`,
+        extra: `&item_subclass.id=${s.id}`,
+      }))
+    : [{ label: "todas", extra: "" }];
+  for (const q of queries) {
+    const found = await fetchPages(q.extra);
+    console.log(`  subclase ${q.label}: ${found.length}`);
+    if (found.length >= pageSize) cappedQueries.push(q.label);
+    for (const d of found) byId.set(d.id, d);
+  }
+
+  const items = [...byId.values()].map((d) => ({
+    id: d.id,
+    name: d.name?.en_US,
+    classId: d.item_class?.id,
+    subclass: d.item_subclass?.name?.en_US,
+    level: d.level,
+    requiredLevel: d.required_level,
+    quality: d.quality?.type,
+    purchasePrice: d.purchase_price,
+    sellPrice: d.sell_price,
+  }));
   const count = (list, pick) => {
     const out = {};
     for (const x of list) out[pick(x) ?? "(sin valor)"] = (out[pick(x) ?? "(sin valor)"] ?? 0) + 1;
@@ -537,16 +549,49 @@ async function runPatterns() {
   const onlyRecipes = items.filter((i) => i.classId === 9);
   // La subclase «Book» agrupa libros que no enseñan recetas de profesión (tomos, librams…).
   const professionPatterns = onlyRecipes.filter((i) => i.subclass !== "Book");
+
+  // Detalle por ítem: la búsqueda no incluye `preview_item`.
+  const previews = [];
+  let detailsFetched = 0;
+  let detailsMissing = 0;
+  if (flags.details !== undefined) {
+    const limit = toNumber(flags.limit, Infinity);
+    for (const [i, item] of professionPatterns.slice(0, limit).entries()) {
+      const file = join(dir, "items", `${item.id}.json`);
+      let body = await readJson(file);
+      if (!body) {
+        const res = await get(STATIC, `/data/wow/item/${item.id}`);
+        if (ok(res)) {
+          body = res.body;
+          await saveJson(file, body, false);
+          detailsFetched += 1;
+        } else {
+          detailsMissing += 1;
+        }
+      }
+      if (body?.preview_item) {
+        item.skill = extractSkillRequirement(body.preview_item);
+        previews.push({ item, preview: body.preview_item });
+      }
+      if ((i + 1) % 100 === 0) console.log(`  detalle ${i + 1}/${professionPatterns.length}`);
+    }
+  }
   const isLocaleKey = (path) => /(^|\.)[a-z]{2}_[A-Z]{2}$/.test(path);
   const previewKeys = Object.fromEntries(
     Object.entries(
       countKeys(
-        previews.map((p) => p.preview_item),
+        previews.map((p) => p.preview),
         { depth: 3 },
       ),
     ).filter(([path]) => !isLocaleKey(path)),
   );
-  const samplePreview = previews.find((p) => p.subclass === "Leatherworking") ?? previews[0];
+  const withSkill = professionPatterns.filter((i) => i.skill);
+  const histogram = {};
+  for (const i of withSkill) {
+    const bucket = `${Math.floor((i.skill.level - 1) / 25) * 25 + 1}-${Math.floor((i.skill.level - 1) / 25) * 25 + 25}`;
+    histogram[bucket] = (histogram[bucket] ?? 0) + 1;
+  }
+  const sample = previews.find((p) => p.item.subclass === "Leatherworking") ?? previews[0];
 
   const recipes = [];
   try {
@@ -562,17 +607,22 @@ async function runPatterns() {
   const summary = {
     region,
     generatedAt: new Date().toISOString(),
-    pageCount,
-    pagesFetched: page - 1,
-    pageSize,
-    lastPageCount: lastCount,
-    envelope,
+    queries: queries.length,
+    cappedQueries,
     totalItems: items.length,
     itemsOfClass9: onlyRecipes.length,
     professionPatterns: professionPatterns.length,
+    details: {
+      requested: flags.details !== undefined,
+      fetched: detailsFetched,
+      missing: detailsMissing,
+      withPreview: previews.length,
+    },
     previewKeys,
-    samplePreview: samplePreview && collapseLocales(samplePreview.preview_item),
-    sampleName: samplePreview && collapseLocales(samplePreview.name),
+    samplePreview: sample && { name: sample.item.name, preview: collapseLocales(sample.preview) },
+    withSkillRequirement: withSkill.length,
+    skillLevelHistogram: histogram,
+    skillExamples: withSkill.slice(0, 10).map((i) => ({ name: i.name, ...i.skill })),
     otherClasses: count(
       items.filter((i) => i.classId !== 9),
       (i) => i.classId,
@@ -580,7 +630,6 @@ async function runPatterns() {
     bySubclass: count(onlyRecipes, (i) => i.subclass),
     byPrefix: count(onlyRecipes, (i) => splitRecipeItemName(i.name).prefix),
     byQuality: count(onlyRecipes, (i) => i.quality),
-    withPurchasePrice: onlyRecipes.filter((i) => i.purchasePrice > 0).length,
     recipesInCatalog: recipes.length,
     match: match && {
       ...match,
@@ -588,7 +637,7 @@ async function runPatterns() {
       sampleUnmatched: match.unmatched.slice(0, 15),
     },
   };
-  await saveJson(join(dir, "patterns.json"), onlyRecipes, false);
+  await saveJson(join(dir, "patterns.json"), professionPatterns, false);
   await saveJson(join(dir, "patterns-summary.json"), summary);
   console.log(JSON.stringify(summary, null, 2));
   console.log(`\nResumen: ${join(dir, "patterns-summary.json")}`);
