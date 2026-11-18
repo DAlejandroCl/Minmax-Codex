@@ -31,12 +31,14 @@ import {
   collapseLocales,
   countKeys,
   createClient,
+  extractPatternTarget,
   extractSkillRequirement,
   fetchToken,
   fillTemplate,
   findIndexList,
   hrefToPath,
   itemCoverage,
+  linkPatternsToRecipes,
   matchPatternsToRecipes,
   parseArgs,
   splitRecipeItemName,
@@ -571,6 +573,7 @@ async function runPatterns() {
       }
       if (body?.preview_item) {
         item.skill = extractSkillRequirement(body.preview_item);
+        item.target = extractPatternTarget(body.preview_item);
         previews.push({ item, preview: body.preview_item });
       }
       if ((i + 1) % 100 === 0) console.log(`  detalle ${i + 1}/${professionPatterns.length}`);
@@ -597,12 +600,70 @@ async function runPatterns() {
   try {
     for (const file of await readdir(join(OUT, "catalog", "recipes"))) {
       const r = await readJson(join(OUT, "catalog", "recipes", file));
-      if (r) recipes.push({ id: r.id, name: r.name });
+      if (r) recipes.push({ id: r.id, name: r.name, craftedItemId: r.crafted_item?.id });
     }
   } catch {
     // sin catálogo: no se calcula el enlace con recetas
   }
   const match = recipes.length ? matchPatternsToRecipes(professionPatterns, recipes) : null;
+
+  // Enlace exacto (ítem fabricado → hechizo → nombre) cuando hay detalle de los patrones.
+  const professionOf = new Map();
+  try {
+    for (const file of await readdir(join(OUT, "catalog", "tiers"))) {
+      const professionId = file.split("-")[0];
+      const profession = await readJson(join(OUT, "catalog", `profession-${professionId}.json`));
+      const tier = await readJson(join(OUT, "catalog", "tiers", file));
+      for (const category of tier?.categories ?? []) {
+        for (const r of category.recipes ?? [])
+          professionOf.set(r.id, profession?.name ?? professionId);
+      }
+    }
+  } catch {
+    // sin catálogo de tiers: no se desglosa por profesión
+  }
+  const link =
+    previews.length > 0 && recipes.length
+      ? linkPatternsToRecipes(
+          professionPatterns.map((i) => ({
+            id: i.id,
+            name: i.name,
+            craftedItemId: i.target?.craftedItemId,
+            spellName: i.target?.spellName,
+          })),
+          recipes,
+        )
+      : null;
+  const patternById = new Map(professionPatterns.map((i) => [i.id, i]));
+  const recipeName = new Map(recipes.map((r) => [r.id, r.name]));
+  const requirements = new Map();
+  for (const l of link?.links ?? []) {
+    const p = patternById.get(l.patternId);
+    if (!p?.skill) continue;
+    const current = requirements.get(l.recipeId);
+    if (!current || p.skill.level < current.minSkill) {
+      requirements.set(l.recipeId, {
+        recipeId: l.recipeId,
+        recipe: recipeName.get(l.recipeId),
+        profession: p.skill.profession,
+        minSkill: p.skill.level,
+        patternItemId: p.id,
+        patternName: p.name,
+        reputation: p.target?.reputation ?? null,
+        binding: p.target?.binding ?? null,
+        linkedBy: l.how,
+      });
+    }
+  }
+  const perProfession = {};
+  for (const r of recipes) {
+    const entry = (perProfession[professionOf.get(r.id) ?? "(desconocida)"] ??= {
+      recipes: 0,
+      withMinSkill: 0,
+    });
+    entry.recipes += 1;
+    if (requirements.has(r.id)) entry.withMinSkill += 1;
+  }
 
   const summary = {
     region,
@@ -630,6 +691,15 @@ async function runPatterns() {
     bySubclass: count(onlyRecipes, (i) => i.subclass),
     byPrefix: count(onlyRecipes, (i) => splitRecipeItemName(i.name).prefix),
     byQuality: count(onlyRecipes, (i) => i.quality),
+    link: link && {
+      method: link.method,
+      recipesLinked: link.recipesLinked,
+      unlinked: link.unlinked.length,
+      sampleUnlinked: link.unlinked.slice(0, 15),
+    },
+    recipesWithMinSkill: requirements.size,
+    recipesWithReputation: [...requirements.values()].filter((r) => r.reputation).length,
+    perProfession,
     recipesInCatalog: recipes.length,
     match: match && {
       ...match,
@@ -637,9 +707,15 @@ async function runPatterns() {
       sampleUnmatched: match.unmatched.slice(0, 15),
     },
   };
+  await saveJson(join(dir, "recipe-requirements.json"), [...requirements.values()], false);
   await saveJson(join(dir, "patterns.json"), professionPatterns, false);
   await saveJson(join(dir, "patterns-summary.json"), summary);
-  console.log(JSON.stringify(summary, null, 2));
+  const short = { ...summary };
+  if (flags.verbose === undefined) {
+    delete short.previewKeys;
+    delete short.samplePreview;
+  }
+  console.log(JSON.stringify(short, null, 2));
   console.log(`\nResumen: ${join(dir, "patterns-summary.json")}`);
 }
 
