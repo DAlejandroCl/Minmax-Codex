@@ -67,6 +67,21 @@ export function normalizeName(name) {
   return (name ?? "").toLowerCase().replace(/\s+/g, " ").trim();
 }
 
+/** Clave de comparación: solo letras y números en minúscula («Transmute: Iron» = «Transmute Iron»). */
+export function matchKey(name) {
+  return (name ?? "").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
+}
+
+/** Sustituye los objetos de traducciones `{en_US, es_MX, …}` por su texto en inglés. */
+export function collapseLocales(value) {
+  if (Array.isArray(value)) return value.map(collapseLocales);
+  if (value && typeof value === "object") {
+    if (typeof value.en_US === "string") return value.en_US;
+    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, collapseLocales(v)]));
+  }
+  return value;
+}
+
 /**
  * Enlaza ítems-patrón con recetas por nombre (sin el prefijo «Pattern:», «Plans:»…).
  * `patterns`: [{id, name}], `recipes`: [{id, name}].
@@ -74,7 +89,7 @@ export function normalizeName(name) {
 export function matchPatternsToRecipes(patterns, recipes) {
   const byName = new Map();
   for (const recipe of recipes) {
-    const key = normalizeName(recipe.name);
+    const key = matchKey(recipe.name);
     if (!byName.has(key)) byName.set(key, []);
     byName.get(key).push(recipe.id);
   }
@@ -83,7 +98,7 @@ export function matchPatternsToRecipes(patterns, recipes) {
   let matched = 0;
   let ambiguous = 0;
   for (const pattern of patterns) {
-    const ids = byName.get(normalizeName(splitRecipeItemName(pattern.name).base));
+    const ids = byName.get(matchKey(splitRecipeItemName(pattern.name).base));
     if (!ids) {
       unmatched.push({ id: pattern.id, name: pattern.name });
       continue;
