@@ -54,6 +54,53 @@ export function countKeys(objects, { depth = 1 } = {}) {
   return Object.fromEntries([...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])));
 }
 
+const RECIPE_PREFIX = /^([^:：]{2,30})[:：]\s*(.+)$/u;
+
+/** «Pattern: Fine Leather Boots» → { prefix: "Pattern", base: "Fine Leather Boots" }. */
+export function splitRecipeItemName(name) {
+  const text = (name ?? "").trim();
+  const match = RECIPE_PREFIX.exec(text);
+  return match ? { prefix: match[1].trim(), base: match[2].trim() } : { prefix: null, base: text };
+}
+
+export function normalizeName(name) {
+  return (name ?? "").toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+/**
+ * Enlaza ítems-patrón con recetas por nombre (sin el prefijo «Pattern:», «Plans:»…).
+ * `patterns`: [{id, name}], `recipes`: [{id, name}].
+ */
+export function matchPatternsToRecipes(patterns, recipes) {
+  const byName = new Map();
+  for (const recipe of recipes) {
+    const key = normalizeName(recipe.name);
+    if (!byName.has(key)) byName.set(key, []);
+    byName.get(key).push(recipe.id);
+  }
+  const recipeIds = new Set();
+  const unmatched = [];
+  let matched = 0;
+  let ambiguous = 0;
+  for (const pattern of patterns) {
+    const ids = byName.get(normalizeName(splitRecipeItemName(pattern.name).base));
+    if (!ids) {
+      unmatched.push({ id: pattern.id, name: pattern.name });
+      continue;
+    }
+    matched += 1;
+    if (ids.length > 1) ambiguous += 1;
+    for (const id of ids) recipeIds.add(id);
+  }
+  return {
+    patterns: patterns.length,
+    matched,
+    ambiguous,
+    unmatched,
+    recipesWithPattern: recipeIds.size,
+  };
+}
+
 /** Primera propiedad que sea una lista de objetos (forma típica de un índice de la API). */
 export function findIndexList(body) {
   for (const [key, value] of Object.entries(body ?? {})) {
