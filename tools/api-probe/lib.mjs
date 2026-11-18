@@ -54,6 +54,43 @@ export function countKeys(objects, { depth = 1 } = {}) {
   return Object.fromEntries([...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])));
 }
 
+/** Primera propiedad que sea una lista de objetos (forma típica de un índice de la API). */
+export function findIndexList(body) {
+  for (const [key, value] of Object.entries(body ?? {})) {
+    if (
+      Array.isArray(value) &&
+      value.length > 0 &&
+      value[0] !== null &&
+      typeof value[0] === "object"
+    ) {
+      return { key, count: value.length, first: value[0] };
+    }
+  }
+  return null;
+}
+
+/** `https://host/data/wow/x/1?namespace=…` → `/data/wow/x/1` (o null si no es una URL). */
+export function hrefToPath(href) {
+  try {
+    return new URL(href).pathname;
+  } catch {
+    return null;
+  }
+}
+
+/** Sustituye `{variable}`; devuelve null si falta alguna. */
+export function fillTemplate(path, vars) {
+  let missing = false;
+  const filled = path.replace(/\{(\w+)\}/g, (_, name) => {
+    if (vars[name] === undefined) {
+      missing = true;
+      return "";
+    }
+    return String(vars[name]);
+  });
+  return missing ? null : filled;
+}
+
 export function tierRefs(profession) {
   return (profession?.skill_tiers ?? []).map((t) => ({ id: t.id, name: t.name }));
 }
