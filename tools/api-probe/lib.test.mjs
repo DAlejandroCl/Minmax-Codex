@@ -5,6 +5,7 @@ import {
   collapseLocales,
   countKeys,
   createClient,
+  extractSkillRequirement,
   fillTemplate,
   findIndexList,
   hrefToPath,
@@ -129,6 +130,26 @@ test("splitRecipeItemName separa el prefijo del nombre de la receta", () => {
 
 test("normalizeName ignora mayúsculas y espacios repetidos", () => {
   assert.equal(normalizeName("  Fine   Leather BOOTS "), "fine leather boots");
+});
+
+test("extractSkillRequirement lee el texto «Requires X (n)»", () => {
+  const preview = {
+    requirements: {
+      skill: {
+        display_string: { en_US: "Requires Leatherworking (95)", es_MX: "Requiere Peletería (95)" },
+      },
+    },
+  };
+  assert.deepEqual(extractSkillRequirement(preview), { profession: "Leatherworking", level: 95 });
+});
+
+test("extractSkillRequirement acepta la forma estructurada y devuelve null si no hay", () => {
+  const structured = {
+    requirements: { skill: { profession: { name: { en_US: "Alchemy" } }, level: 120 } },
+  };
+  assert.deepEqual(extractSkillRequirement(structured), { profession: "Alchemy", level: 120 });
+  assert.equal(extractSkillRequirement({ requirements: { level: { value: 20 } } }), null);
+  assert.equal(extractSkillRequirement(undefined), null);
 });
 
 test("matchKey ignora puntuación y apóstrofes tipográficos", () => {
