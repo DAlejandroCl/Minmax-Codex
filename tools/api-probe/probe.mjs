@@ -12,6 +12,7 @@
  *   pnpm --filter @wow-forever/api-probe probe auction --house=110   # una casa (≈ 10 MB)
  *   pnpm --filter @wow-forever/api-probe probe auction --commodities # solo /commodities de la casa 110
  *   pnpm --filter @wow-forever/api-probe probe discover              # endpoints candidatos por feature
+ *   pnpm --filter @wow-forever/api-probe probe patterns              # ítems «Recipe» y enlace con recetas
  *   pnpm --filter @wow-forever/api-probe probe -- --ns=dynamic-forever --path=/data/wow/ruleset/index
  *
  * Opciones: --limit=N (probar con pocas recetas/ítems), --profession=ID, --ruleset=ID,
@@ -34,7 +35,9 @@ import {
   findIndexList,
   hrefToPath,
   itemCoverage,
+  matchPatternsToRecipes,
   parseArgs,
+  splitRecipeItemName,
   recipeItemIds,
   recipeRefs,
   summarizeAuctionPayload,
@@ -477,7 +480,93 @@ async function runDiscover() {
   console.log(`\nResumen: ${join(dir, "discover-summary.json")}`);
 }
 
+// ───────────────────────────── patterns (SP-1, hueco R-18) ─────────────────────────────
+/** Descarga todos los ítems de clase «Recipe» (id 9) y los enlaza con las recetas por nombre. */
+async function runPatterns() {
+  const dir = join(OUT, "patterns");
+  await mkdir(dir, { recursive: true });
+  const pageSize = toNumber(flags["page-size"], 1000);
+  const maxPages = toNumber(flags["max-pages"], 10);
+  const items = [];
+  let page = 1;
+  let pageCount = 1;
+  while (page <= pageCount && page <= maxPages) {
+    const res = await get(
+      STATIC,
+      `/data/wow/search/item?item_class.id=9&orderby=id&_pageSize=${pageSize}&_page=${page}`,
+    );
+    if (!ok(res)) {
+      console.log(`página ${page}: HTTP ${res.status} ${res.note}`);
+      break;
+    }
+    await saveJson(join(dir, `page-${page}.json`), res.body, false);
+    pageCount = res.body.pageCount ?? 1;
+    for (const r of res.body.results ?? []) {
+      const d = r.data ?? {};
+      items.push({
+        id: d.id,
+        name: d.name?.en_US,
+        classId: d.item_class?.id,
+        subclass: d.item_subclass?.name?.en_US,
+        level: d.level,
+        requiredLevel: d.required_level,
+        quality: d.quality?.type,
+        purchasePrice: d.purchase_price,
+        sellPrice: d.sell_price,
+      });
+    }
+    console.log(`  página ${page}/${pageCount}: ${items.length} ítems`);
+    page += 1;
+  }
+
+  const count = (list, pick) => {
+    const out = {};
+    for (const x of list) out[pick(x) ?? "(sin valor)"] = (out[pick(x) ?? "(sin valor)"] ?? 0) + 1;
+    return out;
+  };
+  const onlyRecipes = items.filter((i) => i.classId === 9);
+
+  const recipes = [];
+  try {
+    for (const file of await readdir(join(OUT, "catalog", "recipes"))) {
+      const r = await readJson(join(OUT, "catalog", "recipes", file));
+      if (r) recipes.push({ id: r.id, name: r.name });
+    }
+  } catch {
+    // sin catálogo: no se calcula el enlace con recetas
+  }
+  const match = recipes.length ? matchPatternsToRecipes(onlyRecipes, recipes) : null;
+
+  const summary = {
+    region,
+    generatedAt: new Date().toISOString(),
+    pageCount,
+    pagesFetched: page - 1,
+    totalItems: items.length,
+    itemsOfClass9: onlyRecipes.length,
+    otherClasses: count(
+      items.filter((i) => i.classId !== 9),
+      (i) => i.classId,
+    ),
+    bySubclass: count(onlyRecipes, (i) => i.subclass),
+    byPrefix: count(onlyRecipes, (i) => splitRecipeItemName(i.name).prefix),
+    byQuality: count(onlyRecipes, (i) => i.quality),
+    withPurchasePrice: onlyRecipes.filter((i) => i.purchasePrice > 0).length,
+    recipesInCatalog: recipes.length,
+    match: match && {
+      ...match,
+      unmatched: match.unmatched.length,
+      sampleUnmatched: match.unmatched.slice(0, 25),
+    },
+  };
+  await saveJson(join(dir, "patterns.json"), onlyRecipes, false);
+  await saveJson(join(dir, "patterns-summary.json"), summary);
+  console.log(JSON.stringify(summary, null, 2));
+  console.log(`\nResumen: ${join(dir, "patterns-summary.json")}`);
+}
+
 const modes = {
+  patterns: runPatterns,
   discover: runDiscover,
   basic: runBasic,
   custom: runBasic,
@@ -486,6 +575,6 @@ const modes = {
   auction: runAuction,
 };
 if (!modes[mode])
-  fail(`Modo desconocido: ${mode}. Usa basic | catalog | items | auction | discover.`);
+  fail(`Modo desconocido: ${mode}. Usa basic | catalog | items | auction | discover | patterns.`);
 await modes[mode]();
 console.log("Recuerda borrar la carpeta out/ al terminar (retención de datos de la API).");
