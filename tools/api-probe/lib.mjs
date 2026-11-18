@@ -102,6 +102,70 @@ export function extractSkillRequirement(preview) {
 }
 
 /**
+ * Datos de un `preview_item` de patrón útiles para enlazarlo con su receta: id del ítem
+ * fabricado (`recipe.item.item.id`), nombre del hechizo que enseña (fórmulas de encantamiento),
+ * requisito de reputación y ligadura.
+ */
+export function extractPatternTarget(preview) {
+  const p = collapseLocales(preview) ?? {};
+  const spellName = p.spells?.[0]?.spell?.name;
+  return {
+    craftedItemId: Number.isInteger(p.recipe?.item?.item?.id) ? p.recipe.item.item.id : null,
+    spellName: typeof spellName === "string" ? spellName : null,
+    reputation: p.requirements?.reputation?.display_string ?? null,
+    binding: p.binding?.type ?? null,
+  };
+}
+
+const pushTo = (map, key, value) => {
+  if (!map.has(key)) map.set(key, []);
+  map.get(key).push(value);
+};
+
+/**
+ * Enlaza patrones con recetas, por orden de fiabilidad: id del ítem fabricado, nombre del
+ * hechizo enseñado y, por último, nombre del patrón sin prefijo.
+ * `patterns`: [{id, name, craftedItemId?, spellName?}], `recipes`: [{id, name, craftedItemId?}].
+ */
+export function linkPatternsToRecipes(patterns, recipes) {
+  const byItem = new Map();
+  const byName = new Map();
+  for (const recipe of recipes) {
+    if (Number.isInteger(recipe.craftedItemId)) pushTo(byItem, recipe.craftedItemId, recipe.id);
+    pushTo(byName, matchKey(recipe.name), recipe.id);
+  }
+  const links = [];
+  const method = { item: 0, spell: 0, name: 0 };
+  const unlinked = [];
+  for (const pattern of patterns) {
+    let how = "item";
+    let ids = Number.isInteger(pattern.craftedItemId)
+      ? byItem.get(pattern.craftedItemId)
+      : undefined;
+    if (!ids && pattern.spellName) {
+      how = "spell";
+      ids = byName.get(matchKey(pattern.spellName));
+    }
+    if (!ids) {
+      how = "name";
+      ids = byName.get(matchKey(splitRecipeItemName(pattern.name).base));
+    }
+    if (!ids) {
+      unlinked.push({ id: pattern.id, name: pattern.name });
+      continue;
+    }
+    method[how] += 1;
+    for (const recipeId of ids) links.push({ recipeId, patternId: pattern.id, how });
+  }
+  return {
+    links,
+    method,
+    unlinked,
+    recipesLinked: new Set(links.map((l) => l.recipeId)).size,
+  };
+}
+
+/**
  * Enlaza ítems-patrón con recetas por nombre (sin el prefijo «Pattern:», «Plans:»…).
  * `patterns`: [{id, name}], `recipes`: [{id, name}].
  */
