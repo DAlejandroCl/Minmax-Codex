@@ -1,8 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { CANDIDATES, NAMESPACES } from "./candidates.mjs";
 import {
   countKeys,
   createClient,
+  fillTemplate,
+  findIndexList,
+  hrefToPath,
   itemCoverage,
   parseArgs,
   qualifyNamespace,
@@ -103,6 +107,44 @@ test("summarizeAuctionPayload sin array devuelve cero entradas", () => {
   const summary = summarizeAuctionPayload({ code: 404 });
   assert.equal(summary.count, 0);
   assert.equal(summary.arrayKey, null);
+});
+
+test("findIndexList detecta la lista de un índice y su primer elemento", () => {
+  const body = { _links: {}, classes: [{ key: { href: "https://x/a/1" }, id: 1 }, { id: 2 }] };
+  const list = findIndexList(body);
+  assert.equal(list.key, "classes");
+  assert.equal(list.count, 2);
+  assert.equal(list.first.id, 1);
+  assert.equal(findIndexList({ id: 1, name: "x" }), null);
+  assert.equal(findIndexList({ list: [] }), null);
+  assert.equal(findIndexList(null), null);
+});
+
+test("hrefToPath devuelve solo la ruta", () => {
+  assert.equal(
+    hrefToPath("https://us.api.blizzard.com/data/wow/talent-tree/5?namespace=static-x"),
+    "/data/wow/talent-tree/5",
+  );
+  assert.equal(hrefToPath("no es url"), null);
+});
+
+test("fillTemplate sustituye variables o devuelve null si falta alguna", () => {
+  assert.equal(fillTemplate("/data/wow/item/{itemId}", { itemId: 7 }), "/data/wow/item/7");
+  assert.equal(fillTemplate("/data/wow/item/{itemId}", {}), null);
+  assert.equal(fillTemplate("/data/wow/region/index", {}), "/data/wow/region/index");
+});
+
+test("los candidatos de discover son válidos y no se repiten", () => {
+  const seen = new Set();
+  for (const c of CANDIDATES) {
+    assert.ok(NAMESPACES.includes(c.ns), `namespace inválido: ${c.path}`);
+    assert.ok(c.path.startsWith("/data/wow/"), `ruta inválida: ${c.path}`);
+    assert.ok(c.feature, `falta feature: ${c.path}`);
+    const key = `${c.ns} ${c.path}`;
+    assert.ok(!seen.has(key), `repetido: ${key}`);
+    seen.add(key);
+  }
+  assert.ok(CANDIDATES.length >= 30);
 });
 
 test("itemCoverage cuenta ítems de recetas con publicaciones", () => {
