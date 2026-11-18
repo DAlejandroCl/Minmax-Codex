@@ -6,8 +6,9 @@
   "description": "Sonda exploratoria de la API de Battle.net para WoW Forever (spikes SP-1 y SP-3)",
   "scripts": {
     "probe": "node --env-file-if-exists=../../.env probe.mjs",
-    "lint": "eslint probe.mjs lib.mjs lib.test.mjs candidates.mjs",
-    "typecheck": "node --check probe.mjs && node --check lib.mjs && node --check lib.test.mjs && node --check candidates.mjs",
-    "test": "node --test"
+    "lint": "eslint probe.mjs lib.mjs lib.test.mjs candidates.mjs inspect-discover.mjs",
+    "typecheck": "node --check probe.mjs && node --check lib.mjs && node --check lib.test.mjs && node --check candidates.mjs && node --check inspect-discover.mjs",
+    "test": "node --test",
+    "inspect": "node inspect-discover.mjs"
   }
 }
