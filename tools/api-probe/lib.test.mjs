@@ -8,11 +8,14 @@ import {
   findIndexList,
   hrefToPath,
   itemCoverage,
+  matchPatternsToRecipes,
+  normalizeName,
   parseArgs,
   qualifyNamespace,
   recipeItemIds,
   recipeRefs,
   summarizeAuctionPayload,
+  splitRecipeItemName,
   tierRefs,
   toNumber,
 } from "./lib.mjs";
@@ -107,6 +110,42 @@ test("summarizeAuctionPayload sin array devuelve cero entradas", () => {
   const summary = summarizeAuctionPayload({ code: 404 });
   assert.equal(summary.count, 0);
   assert.equal(summary.arrayKey, null);
+});
+
+test("splitRecipeItemName separa el prefijo del nombre de la receta", () => {
+  assert.deepEqual(splitRecipeItemName("Pattern: Fine Leather Boots"), {
+    prefix: "Pattern",
+    base: "Fine Leather Boots",
+  });
+  assert.deepEqual(splitRecipeItemName("Formula: Enchant Bracer - Lesser Strength"), {
+    prefix: "Formula",
+    base: "Enchant Bracer - Lesser Strength",
+  });
+  assert.deepEqual(splitRecipeItemName("Linen Cloth"), { prefix: null, base: "Linen Cloth" });
+  assert.deepEqual(splitRecipeItemName(undefined), { prefix: null, base: "" });
+});
+
+test("normalizeName ignora mayúsculas y espacios repetidos", () => {
+  assert.equal(normalizeName("  Fine   Leather BOOTS "), "fine leather boots");
+});
+
+test("matchPatternsToRecipes enlaza por nombre y reporta no enlazados y ambiguos", () => {
+  const recipes = [
+    { id: 1, name: "Fine Leather Boots" },
+    { id: 2, name: "Bolt of Linen" },
+    { id: 3, name: "bolt of linen" },
+  ];
+  const patterns = [
+    { id: 10, name: "Pattern: Fine Leather Boots" },
+    { id: 11, name: "Pattern: Bolt of Linen" },
+    { id: 12, name: "Pattern: Desconocida" },
+  ];
+  const result = matchPatternsToRecipes(patterns, recipes);
+  assert.equal(result.patterns, 3);
+  assert.equal(result.matched, 2);
+  assert.equal(result.ambiguous, 1);
+  assert.equal(result.recipesWithPattern, 3);
+  assert.deepEqual(result.unmatched, [{ id: 12, name: "Pattern: Desconocida" }]);
 });
 
 test("findIndexList detecta la lista de un índice y su primer elemento", () => {
