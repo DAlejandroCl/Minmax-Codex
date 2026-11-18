@@ -83,7 +83,9 @@ Desglose de los 126 reactivos sin publicación (21,4 %):
 | Sin ítem en `static-forever` (404) | 22 | Ninguna por ahora |
 | Sin publicación y sin `purchase_price` | 31 | Ninguna por ahora (raros, no comerciados esa hora, o de drop/BoP) |
 
-> **Corrección (2026-11-17):** una versión anterior de este documento afirmaba que los 73 de `purchase_price` > 0 «se compran a vendedor» y que 536 de 589 reactivos (91 %) tenían fuente de precio. **Esa inferencia no está respaldada:** `purchase_price` es el campo de precio de compra del ítem y puede ser > 0 aunque ningún NPC lo venda. La cifra sólida es la de subasta: **463 de 589 (78,6 %)** con publicación en una casa y una lectura. Hasta medirlo (`inspect:prices` compara ítems con y sin subasta), la API **no dice qué ítems vende un NPC**; eso entra en el hueco R-18.
+> **Corrección (2026-11-17):** una versión anterior de este documento afirmaba que los 73 de `purchase_price` > 0 «se compran a vendedor» y que 536 de 589 reactivos (91 %) tenían fuente de precio. **Esa inferencia no está respaldada:** `purchase_price` es el campo de precio de compra del ítem y puede ser > 0 aunque ningún NPC lo venda. La cifra sólida es la de subasta: **463 de 589 (78,6 %)** con publicación en una casa y una lectura. **Medido después (`inspect:prices`):** de los 463 reactivos con publicación en subasta, **457 tienen `purchase_price` > 0**, incluidos ítems que solo se recolectan o se obtienen de criaturas (Peacebloom 40, Silverleaf 40, Linen Cloth 55). El campo existe en casi todos los ítems, así que **no sirve para saber qué vende un NPC**; la API no lo dice, y eso entra en el hueco R-18.
+
+Entrada de commodities real: `{id, item{id}, quantity, unit_price, time_left}`. `unit_price` está en cobre. Ejemplos (casa 110, una lectura): Linen Cloth 25 (172 publicaciones), Peacebloom 100 (332), Rough Stone 9 (159), Empty Vial 6 (38), Wool Cloth 150 (156).
 
 Los reactivos sin publicación requieren override manual (RF-PRI-03) o precios de otras casas/horas, y la UI debe marcarlos «sin precio». Cálculo con una sola casa y una sola lectura.
 
