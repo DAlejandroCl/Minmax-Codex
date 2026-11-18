@@ -11,6 +11,7 @@
  *   pnpm --filter @wow-forever/api-probe probe auction --compare     # casas por ruleset
  *   pnpm --filter @wow-forever/api-probe probe auction --house=110   # una casa (≈ 10 MB)
  *   pnpm --filter @wow-forever/api-probe probe auction --commodities # solo /commodities de la casa 110
+ *   pnpm --filter @wow-forever/api-probe probe discover              # endpoints candidatos por feature
  *   pnpm --filter @wow-forever/api-probe probe -- --ns=dynamic-forever --path=/data/wow/ruleset/index
  *
  * Opciones: --limit=N (probar con pocas recetas/ítems), --profession=ID, --ruleset=ID,
@@ -22,12 +23,16 @@
  *
  * Los Términos de la API limitan la retención: borra la carpeta out/ cuando termines.
  */
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { CANDIDATES } from "./candidates.mjs";
 import {
   countKeys,
   createClient,
   fetchToken,
+  fillTemplate,
+  findIndexList,
+  hrefToPath,
   itemCoverage,
   parseArgs,
   recipeItemIds,
@@ -385,13 +390,102 @@ async function runAuction() {
   console.log(`\nResumen: ${join(dir, "auction-summary.json")}`);
 }
 
+// ───────────────────────────── discover (cobertura por feature) ─────────────────────────────
+async function firstId(dir) {
+  try {
+    const files = (await readdir(dir)).filter((f) => f.endsWith(".json")).sort();
+    const id = Number.parseInt(files[0] ?? "", 10);
+    return Number.isInteger(id) ? id : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+async function runDiscover() {
+  const dir = join(OUT, "discover");
+  await mkdir(dir, { recursive: true });
+  const vars = {
+    recipeId: await firstId(join(OUT, "catalog", "recipes")),
+    itemId: await firstId(join(OUT, "catalog", "items")),
+    professionId: 197,
+  };
+  const namespaces = { static: STATIC, dynamic: DYNAMIC };
+  const fileFor = (ns, path) =>
+    join(dir, `${ns}${path}`.replace(/[^a-z0-9._-]+/gi, "_").slice(0, 120) + ".json");
+  const save = async (ns, path, res) => {
+    if (res.body && res.bytes <= 1_500_000) await saveJson(fileFor(ns, path), res.body, false);
+  };
+
+  const rows = [];
+  for (const candidate of CANDIDATES) {
+    const path = fillTemplate(candidate.path, vars);
+    const row = { feature: candidate.feature, ns: candidate.ns, path: path ?? candidate.path };
+    if (!path) {
+      rows.push({
+        ...row,
+        status: "omitido",
+        note: "falta el catálogo (ejecuta `probe catalog` e `items`)",
+      });
+      console.log(`omit ${candidate.ns}  ${candidate.path}`);
+      continue;
+    }
+    const ns = namespaces[candidate.ns];
+    const res = await get(ns, path);
+    Object.assign(row, {
+      status: res.status,
+      bytes: res.bytes,
+      keys: res.body ? Object.keys(res.body).slice(0, 12) : [],
+    });
+    let extra = "";
+    if (ok(res)) {
+      await save(candidate.ns, path, res);
+      const list = findIndexList(res.body);
+      if (list) {
+        row.list = { key: list.key, count: list.count };
+        extra = `${list.key}[${list.count}]`;
+        const detailPath = candidate.follow ? hrefToPath(list.first?.key?.href) : null;
+        if (detailPath) {
+          const detail = await get(ns, detailPath);
+          row.detail = {
+            path: detailPath,
+            status: detail.status,
+            keys: detail.body ? Object.keys(detail.body).slice(0, 16) : [],
+          };
+          if (ok(detail)) await save(candidate.ns, detailPath, detail);
+          extra += ` → detalle ${detail.status}`;
+        }
+      }
+    }
+    rows.push(row);
+    console.log(`${String(row.status).padEnd(4)} ${candidate.ns.padEnd(7)} ${path} ${extra}`);
+  }
+
+  const byFeature = {};
+  for (const row of rows) {
+    const f = (byFeature[row.feature] ??= { ok: 0, total: 0, found: [] });
+    f.total += 1;
+    if (row.status === 200) {
+      f.ok += 1;
+      f.found.push(row.path);
+    }
+  }
+  await saveJson(join(dir, "discover-summary.json"), { region, vars, byFeature, rows });
+  console.log("\nResumen por feature (200 / total):");
+  for (const [feature, f] of Object.entries(byFeature)) {
+    console.log(`  ${feature}: ${f.ok}/${f.total}`);
+  }
+  console.log(`\nResumen: ${join(dir, "discover-summary.json")}`);
+}
+
 const modes = {
+  discover: runDiscover,
   basic: runBasic,
   custom: runBasic,
   catalog: runCatalog,
   items: runItems,
   auction: runAuction,
 };
-if (!modes[mode]) fail(`Modo desconocido: ${mode}. Usa basic | catalog | items | auction.`);
+if (!modes[mode])
+  fail(`Modo desconocido: ${mode}. Usa basic | catalog | items | auction | discover.`);
 await modes[mode]();
 console.log("Recuerda borrar la carpeta out/ al terminar (retención de datos de la API).");
