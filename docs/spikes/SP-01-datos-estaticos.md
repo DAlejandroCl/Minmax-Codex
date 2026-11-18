@@ -31,7 +31,7 @@ La propuesta original era extraer datos de archivos del cliente. Desde el lanzam
 (Algunos ítems son a la vez reactivo y producto, por eso la suma supera 2.703.)
 
 - La cifra comunitaria de ≈ 43 % de 404 se refería a **todos los ítems de una casa de subastas**; para los ítems de recetas la cobertura es mucho mejor, y para reactivos casi total.
-- Los ítems que sí responden (2.358) traen: `name`, `level`, `required_level`, `quality`, `item_class`, `item_subclass`, `inventory_type`, `is_stackable`, `max_count`, **`purchase_price`**, **`purchase_quantity`** y **`sell_price`**. `purchase_price` es el precio de compra a vendedor (cuando existe) y `sell_price` el de venta a vendedor: sirven para el valor de recuperación y para reactivos de vendedor. No indican **qué** vendedor ni dónde.
+- Los ítems que sí responden (2.358) traen: `name`, `level`, `required_level`, `quality`, `item_class`, `item_subclass`, `inventory_type`, `is_stackable`, `max_count`, **`purchase_price`**, **`purchase_quantity`** y **`sell_price`**. `sell_price` es el precio de venta a vendedor (sirve para el valor de recuperación). `purchase_price` es el precio de compra del ítem, pero **no demuestra que un NPC lo venda** (corregido el 2026-11-17; ver [SP-03](SP-03-precios.md)); tampoco indican qué vendedor ni dónde.
 - Los 404 incluyen IDs nuevos (≥ 210000) y varios antiguos; los productos sin ítem deben mostrarse como «sin resolver».
 
 ## 3. Hueco principal (R-18, confirmado para estos endpoints)
@@ -83,7 +83,9 @@ Lectura:
 
 - **Talentos:** hay datos para construir árboles por especialización (27 árboles, 652 talentos).
 - **BiS:** hay sets de ítems y reputaciones, pero **no hay tablas de botín** (diario de instancias y jefes sin contenido visible). La lista BiS seguirá siendo editorial.
-- **Patterns:** no hay NPC ni vendedores; la vía indirecta es buscar ítems de clase «receta» (`search/item`) y ver si su `preview_item` enlaza la receta que enseñan. Por verificar.
+- **Patterns:** no hay NPC ni vendedores (el diario y `search/creature` devuelven vacío). Sí hay **ítems de clase «Recipe» (id 9)**: el primer resultado de `search/item` fue «Pattern: Fine Leather Boots» (subclase = profesión, `purchase_price` 100, nivel 15). Como el nombre contiene el de la receta, se pueden enlazar por nombre (`probe patterns`); esto da el precio del patrón en subasta, pero **no dónde se aprende**.
+- **Diario y criaturas:** `journal-expansion`, `journal-instance`, `journal-encounter` y `pvp-talent` devuelven solo `_links`; `search/creature` y `search/journal-encounter` devuelven una página sin resultados. No hay datos de jefes, instancias ni criaturas.
+- **Misiones:** `quest/index` trae las claves `categories`, `areas` y `types`; las rutas `quest-category` y `quest-area` que probé daban 404 porque en la API van como `quest/category/index` y similares (por probar).
 - **Iconos:** `media/item` entrega `assets`; antes de usarlos revisa la política de contenido ([SP-07](SP-07-legal.md)).
 
 ## 4. Opciones para cubrir el hueco
