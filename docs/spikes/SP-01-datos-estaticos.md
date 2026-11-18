@@ -48,7 +48,43 @@ Consecuencias:
 - No se puede saber dónde se compra un pattern ni su precio fijo, base del optimizador (ADR-010). `purchase_price` del ítem pattern, si existe, da el precio pero no la fuente.
 - El orden de las recetas dentro de una profesión no está en los datos: hay que reconstruirlo.
 
-Límites de esta conclusión: se probaron los endpoints de profesión, tier, receta e ítem. **No** se probaron otros posibles (NPC, vendedor, zona, spell, búsqueda), que podrían existir sin estar en los índices que conocemos.
+Límites de esta conclusión: además de profesión, tier, receta e ítem se exploraron 37 endpoints candidatos (ver §3b). No apareció ningún endpoint de NPC, vendedor, entrenador ni zona con datos visibles, pero hay una vía indirecta para los patterns (ítems de tipo receta).
+
+## 3b. Cobertura por feature (`probe discover`, 2026-11-17, región `us`)
+
+Resultado por estado HTTP; el contenido de cada detalle falta por inspeccionar.
+
+| Feature | Endpoint | Resultado |
+|---------|----------|-----------|
+| Clases y talentos | `playable-class/index` | 200, **9 clases** (+ detalle) |
+| | `playable-specialization/index` | 200, **27 especializaciones** (+ detalle) |
+| | `playable-race/index` | 200, 10 razas |
+| | `power-type/index` | 200, 6 tipos |
+| | `talent-tree/index` | 200, **27 árboles de talentos** (`spec_talent_trees`) |
+| | `talent/index` | 200, **652 talentos** (+ detalle) |
+| | `pvp-talent/index` | 200 sin lista detectada |
+| | `spell/{id}` | 404 con un ID de receta (el ID de receta no coincide con el de hechizo) |
+| BiS y fuentes | `item-set/index` | 200, **163 sets** |
+| | `item-class/index` | 200, 13 clases de ítem |
+| | `reputation-faction/index`, `reputation-tiers/index` | 200, 56 facciones y 1 tabla de rangos |
+| | `creature-family`, `creature-type` | 200, 27 y 13 |
+| | `journal-expansion`, `journal-instance`, `journal-encounter`, `quest` | 200 **sin lista detectada** (vacíos o con otra forma) |
+| | `quest-category`, `quest-area` | 404 |
+| | `item/{id}` | 200; trae `appearances` y `preview_item` |
+| Patterns y vendedores | `search/item?name.en_US=Pattern` | 200, **100 resultados** (tamaño de página) |
+| | `search/spell?name.en_US=Bolt` | 200, 3 resultados |
+| | `search/creature`, `search/journal-encounter` | 200 **sin resultados visibles** |
+| | `search/recipe` | 404 |
+| Armory (medios) | `media/item/{id}`, `media/profession/{id}` | 200 (`assets`) |
+| | `media/spell/{id}` | 404 |
+| Otros | `region`, `connected-realm`, `pvp-season` (estático y dinámico), `token` | 404: coherente con la ausencia de reinos |
+
+Lectura:
+
+- **Talentos:** hay datos para construir árboles por especialización (27 árboles, 652 talentos).
+- **BiS:** hay sets de ítems y reputaciones, pero **no hay tablas de botín** (diario de instancias y jefes sin contenido visible). La lista BiS seguirá siendo editorial.
+- **Patterns:** no hay NPC ni vendedores; la vía indirecta es buscar ítems de clase «receta» (`search/item`) y ver si su `preview_item` enlaza la receta que enseñan. Por verificar.
+- **Iconos:** `media/item` entrega `assets`; antes de usarlos revisa la política de contenido ([SP-07](SP-07-legal.md)).
 
 ## 4. Opciones para cubrir el hueco
 
