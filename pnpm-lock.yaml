@@ -41,6 +41,8 @@ importers:
 
   tools/api-probe: {}
 
+  tools/measure: {}
+
 packages:
 
   '@cacheable/memory@2.2.0':
