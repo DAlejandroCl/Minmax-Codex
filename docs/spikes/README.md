@@ -6,7 +6,7 @@
 |----|----------|--------|-----------|----------------|
 | SP-1 | ¿Cómo obtener datos estáticos de forma reproducible y legítima? | **Medido**: 2.493 recetas con reactivos; 3,7 % de reactivos en 404; sin umbrales ni fuentes en las recetas, pero 1.834 patrones traen la habilidad mínima de ≈ 72 % de las recetas (R-18 mitigado en parte) | [SP-01](SP-01-datos-estaticos.md) | Enlazar por ítem fabricado y revisar `recipe-requirements.json`; medir umbrales de color y recetas de entrenador (SP-4) |
 | SP-2 | ¿Qué cubre la API de personajes y qué solo un addon? | **Reorientado** | [SP-02](SP-02-personajes-api-vs-addon.md) | Comparar API vs addon con un personaje real |
-| SP-3 | ¿Cuál es la fuente primaria de precios? | **Casi validado**: 4 rulesets × 15 casas; casa real con 96.465 publicaciones y 84.286 de commodities; 78,6 % de los reactivos de recetas con precio en una casa | [SP-03](SP-03-precios.md) | Medir cadencia cada hora y cobertura en otras casas; decidir ADR-013 |
+| SP-3 | ¿Cuál es la fuente primaria de precios? | **Casi validado**: 4 rulesets × 15 casas; casa real con 96.465 publicaciones y 84.286 de commodities; 78,6 % de los reactivos de recetas con precio en una casa | [SP-03](SP-03-precios.md) | Medir cadencia cada hora y cobertura en otras casas; ADR-013 aceptado |
 | SP-4 | ¿Cómo se calcula el skill-up por color? | **Guía lista** (requiere medición en el juego) | [SP-04](SP-04-skillup.md) | Muestreo in-game |
 | SP-5 | ¿El optimizador iguala/mejora guías publicadas? | **Bloqueado** por SP-1 y SP-4 | — | — |
 | SP-6 | ¿Astro + islas o SPA? | Pendiente | — | Prototipo de una página de entidad + calculadora |
@@ -14,7 +14,7 @@
 
 ## Cambio de situación (2026-11-16)
 
-La premisa de [07](../07-fuentes-de-datos-y-viabilidad.md) y de ADR-002 ("no hay API pública para Forever") quedó **desactualizada**: desde el 5–7 de noviembre la API de Battle.net sirve datos estáticos, perfiles de personaje y subastas de Forever, aunque **sin documentación oficial**. Esto afecta a SP-1, SP-2 y SP-3 y motiva la propuesta [ADR-013](../11-justificacion-de-decisiones-de-ingenieria.md#adr-013--api-first-con-addon-como-complemento-propuesta), **pendiente de tu aprobación**.
+La premisa de [07](../07-fuentes-de-datos-y-viabilidad.md) y de ADR-002 ("no hay API pública para Forever") quedó **desactualizada**: desde el 5–7 de noviembre la API de Battle.net sirve datos estáticos, perfiles de personaje y subastas de Forever, aunque **sin documentación oficial**. Esto afecta a SP-1, SP-2 y SP-3 y motiva la [ADR-013](../11-justificacion-de-decisiones-de-ingenieria.md#adr-013--api-first-con-addon-como-complemento), **aceptado el 2026-11-18**.
 
 ## Herramienta
 
