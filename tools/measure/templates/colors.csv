@@ -1,0 +1,3 @@
+# Color mostrado por receta a una habilidad dada. req_skill sale de recipe-requirements.json (vacío si no hay patrón).
+date,profession,recipe,req_skill,skill,color
+2026-11-19,Tailoring,Ejemplo de receta,40,40,orange
