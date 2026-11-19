@@ -95,7 +95,7 @@ Sigue **sin verificar**: la forma exacta de cada entrada de commodities (se espe
 
 ```bash
 git pull && pnpm install
-pnpm --filter @wow-forever/api-probe probe auction --compare --house=110
+pnpm --filter @minmax-codex/api-probe probe auction --compare --house=110
 ```
 
 Descarga el índice de casas de los 4 rulesets y **una** casa (≈ 10 MB, guardada en `out/`). `auction-summary.json` incluye: forma de la respuesta, campos y rangos numéricos, nº de subastas e ítems distintos, y las cabeceras `Last-Modified`/`Date`/`Cache-Control` (sirven para estimar la cadencia). Para medir la cadencia, repite la llamada con una hora de diferencia y compara `Last-Modified`.
