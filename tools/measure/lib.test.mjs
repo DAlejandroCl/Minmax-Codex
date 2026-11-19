@@ -101,11 +101,31 @@ test("buildDatasets: catálogo por profesión con requisitos y trainers sin patr
   const recipes = new Map([[1, { crafted_item: { id: 10 }, crafted_quantity: 2, reagents: [{}, {}] }]]);
   const requirements = new Map([[2, { minSkill: 65, patternItemId: 99, patternName: "Pattern: B", reputation: null, binding: null }]]);
   const d = buildDatasets({ professions, recipes, requirements, patterns: [{ id: 99, name: "Pattern: B" }] });
-  assert.equal(d.recipes.length, 3); // B aparece en dos profesiones
+  assert.equal(d.recipes.length, 3);
+  assert.ok(d.colors.every((r) => "recipe_id" in r)); // B aparece en dos profesiones
   const a = d.recipes.find((r) => r.recipe === "A");
   assert.equal(a.crafted_item_id, 10);
   assert.equal(a.reagent_count, 2);
   assert.equal(d.colors.find((r) => r.recipe === "B, Greater" && r.profession === "Tailoring").req_skill, 65);
   assert.deepEqual(d.trainers.map((r) => r.recipe), ["A"]); // solo la receta sin patrón
   assert.equal(d.vendors.length, 1);
+});
+
+import { quantityOf } from "./lib.mjs";
+
+test("quantityOf maneja número, value y rango", () => {
+  assert.equal(quantityOf(2), 2);
+  assert.equal(quantityOf({ value: 3 }), 3);
+  assert.equal(quantityOf({ minimum: 1, maximum: 3 }), "1-3");
+  assert.equal(quantityOf({ minimum: 2, maximum: 2 }), 2);
+  assert.equal(quantityOf(undefined), "");
+});
+
+test("colorTransitions distingue recetas con el mismo nombre por recipe_id", () => {
+  const rows = [
+    { profession: "P", recipe_id: "1", recipe: "X", req_skill: "10", skill: "10", color: "orange" },
+    { profession: "P", recipe_id: "2", recipe: "X", req_skill: "50", skill: "10", color: "grey" },
+    { profession: "P", recipe_id: "1", recipe: "X", req_skill: "10", skill: "30", color: "yellow" },
+  ];
+  assert.equal(colorTransitions(rows).length, 2);
 });
