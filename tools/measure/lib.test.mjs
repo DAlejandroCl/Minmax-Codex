@@ -72,3 +72,40 @@ test("colorTransitions detecta retrocesos de color", () => {
   ];
   assert.throws(() => colorTransitions(rows), /retrocede/);
 });
+
+import { splitCsvLine, toCsv, nameOf, buildDatasets } from "./lib.mjs";
+
+test("CSV: ida y vuelta con comas y comillas", () => {
+  const csv = toCsv(["a", "b"], [{ a: 'Elixir, Greater "X"', b: 2 }]);
+  const [row] = parseCsv(csv);
+  assert.equal(row.a, 'Elixir, Greater "X"');
+  assert.deepEqual(splitCsvLine('a,"b,c",d'), ["a", "b,c", "d"]);
+});
+
+test("filas pendientes (vacías) se omiten en el análisis", () => {
+  assert.deepEqual(summarizeCrafts([{ recipe: "A", color: "", skill_start: "", crafts: "", skill_ups: "" }]), []);
+  assert.deepEqual(colorTransitions([{ profession: "P", recipe: "A", req_skill: "5", skill: "", color: "" }]), []);
+});
+
+test("nameOf acepta texto u objeto por idioma", () => {
+  assert.equal(nameOf("X"), "X");
+  assert.equal(nameOf({ en_US: "X", es_MX: "Y" }), "X");
+  assert.equal(nameOf(undefined), "");
+});
+
+test("buildDatasets: catálogo por profesión con requisitos y trainers sin patrón", () => {
+  const professions = [
+    { name: "Tailoring", tiers: [{ name: "T", categories: [{ name: "Cat", recipes: [{ id: 2, name: "B, Greater" }, { id: 1, name: "A" }] }] }] },
+    { name: "Cooking", tiers: [{ name: "T", categories: [{ name: "Cat", recipes: [{ id: 2, name: "B, Greater" }] }] }] },
+  ];
+  const recipes = new Map([[1, { crafted_item: { id: 10 }, crafted_quantity: 2, reagents: [{}, {}] }]]);
+  const requirements = new Map([[2, { minSkill: 65, patternItemId: 99, patternName: "Pattern: B", reputation: null, binding: null }]]);
+  const d = buildDatasets({ professions, recipes, requirements, patterns: [{ id: 99, name: "Pattern: B" }] });
+  assert.equal(d.recipes.length, 3); // B aparece en dos profesiones
+  const a = d.recipes.find((r) => r.recipe === "A");
+  assert.equal(a.crafted_item_id, 10);
+  assert.equal(a.reagent_count, 2);
+  assert.equal(d.colors.find((r) => r.recipe === "B, Greater" && r.profession === "Tailoring").req_skill, 65);
+  assert.deepEqual(d.trainers.map((r) => r.recipe), ["A"]); // solo la receta sin patrón
+  assert.equal(d.vendors.length, 1);
+});
