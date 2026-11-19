@@ -1,9 +1,9 @@
 {
-  "name": "@wow-forever/api-probe",
+  "name": "@minmax-codex/api-probe",
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Sonda exploratoria de la API de Battle.net para WoW Forever (spikes SP-1 y SP-3)",
+  "description": "Sonda exploratoria de la API de Battle.net para Forever (spikes SP-1 y SP-3)",
   "scripts": {
     "probe": "node --env-file-if-exists=../../.env probe.mjs",
     "lint": "eslint probe.mjs lib.mjs lib.test.mjs candidates.mjs inspect-discover.mjs inspect-prices.mjs",
