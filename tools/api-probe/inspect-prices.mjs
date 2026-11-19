@@ -3,7 +3,7 @@
  * Comprueba qué significa `purchase_price` y cómo son las entradas de /commodities, cruzando
  * lo descargado por `probe catalog`, `probe items` y `probe auction --commodities`.
  *
- *   pnpm --filter @wow-forever/api-probe inspect:prices
+ *   pnpm --filter @minmax-codex/api-probe inspect:prices
  *
  * Pregunta que responde: ¿`purchase_price` > 0 distingue a los ítems que vende un NPC, o lo
  * tienen casi todos los ítems (incluidos los que solo se obtienen recolectando)?
