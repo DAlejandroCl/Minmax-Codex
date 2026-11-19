@@ -45,7 +45,7 @@ Con una profesión en el juego, en la ventana de profesión cada receta se muest
 Resultado esperado: una regla `umbrales(R)` o la constancia de que hay que medir receta por receta.
 
 ## 5. Método C (propuesta): addon de recolección
-Un addon propio (complemento del ADR-013) que, con un clic, vuelque a `SavedVariables`:
+Un addon propio (complemento previsto en el ADR-013, aceptado) que, con un clic, vuelque a `SavedVariables`:
 
 - **Color de cada receta** a la habilidad actual del personaje (permite acotar umbrales con muchos personajes y niveles).
 - **Lista del entrenador**: habilidad requerida y costo de cada receta que enseña (cubre las recetas sin patrón).
