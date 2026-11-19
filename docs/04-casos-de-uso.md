@@ -22,7 +22,7 @@ flowchart LR
   A([Administrador]):::a
   S([Scheduler ETL]):::a
 
-  subgraph Sistema["Wiki Forever"]
+  subgraph Sistema["Minmax Codex"]
     CU01(CU-01 Explorar wiki/DB)
     CU02(CU-02 Buscar entidad)
     CU09(CU-09 Generar guía de profesión)
