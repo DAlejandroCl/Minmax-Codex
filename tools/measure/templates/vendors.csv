@@ -1,0 +1,3 @@
+# Patrones vendidos por NPC (fuente de cada patrón).
+date,vendor,zone,pattern,cost_copper
+2026-11-19,Ejemplo de vendedor,Zona,Pattern: Ejemplo,500
