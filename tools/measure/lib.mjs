@@ -122,7 +122,8 @@ export function colorTransitions(rows) {
     if (r.color === "" || r.skill === "") continue; // fila pendiente de medir
     const color = r.color.toLowerCase();
     if (!COLORS.includes(color)) throw new Error(`Color desconocido: ${r.color}`);
-    const key = `${r.profession}|${r.recipe}`;
+    // Varias recetas comparten nombre (p. ej. variantes de Season of Discovery): la clave es el id.
+    const key = `${r.profession}|${r.recipe_id || r.recipe}`;
     const list = byRecipe.get(key) ?? { profession: r.profession, recipe: r.recipe, req: r.req_skill === "" ? null : Number(r.req_skill), obs: [] };
     list.obs.push({ skill: Number(r.skill), color });
     byRecipe.set(key, list);
@@ -164,6 +165,17 @@ export function nameOf(value) {
   return "";
 }
 
+/** Cantidad fabricada: número, `{ value }` o `{ minimum, maximum }` (rango «a-b»). */
+export function quantityOf(q) {
+  if (q == null) return "";
+  if (typeof q === "number") return q;
+  if (Number.isFinite(q.value)) return q.value;
+  if (Number.isFinite(q.minimum) && Number.isFinite(q.maximum)) {
+    return q.minimum === q.maximum ? q.minimum : `${q.minimum}-${q.maximum}`;
+  }
+  return "";
+}
+
 export const RECIPE_HEADERS = [
   "profession", "recipe_id", "recipe", "tier", "category", "crafted_item_id", "crafted_quantity",
   "reagent_count", "min_skill", "pattern_item_id", "pattern_name", "reputation", "binding",
@@ -193,7 +205,7 @@ export function buildDatasets({ professions, recipes, requirements, patterns = [
             tier: nameOf(t.name),
             category: nameOf(c.name),
             crafted_item_id: body?.crafted_item?.id ?? "",
-            crafted_quantity: body?.crafted_quantity ?? "",
+            crafted_quantity: quantityOf(body?.crafted_quantity),
             reagent_count: body ? (body.reagents ?? []).length : "",
             min_skill: req?.minSkill ?? "",
             pattern_item_id: req?.patternItemId ?? "",
@@ -206,7 +218,7 @@ export function buildDatasets({ professions, recipes, requirements, patterns = [
     }
   }
   catalog.sort((a, b) => a.profession.localeCompare(b.profession) || a.recipe.localeCompare(b.recipe) || a.recipe_id - b.recipe_id);
-  const base = (r) => ({ profession: r.profession, recipe: r.recipe });
+  const base = (r) => ({ profession: r.profession, recipe_id: r.recipe_id, recipe: r.recipe });
   return {
     recipes: catalog,
     crafts: catalog.map((r) => ({ date: "", ...base(r), skill_start: "", color: "", crafts: "", skill_ups: "" })),
@@ -214,7 +226,9 @@ export function buildDatasets({ professions, recipes, requirements, patterns = [
     trainers: catalog
       .filter((r) => r.pattern_item_id === "")
       .map((r) => ({ date: "", ...base(r), trainer: "", zone: "", req_skill: "", cost_copper: "" }))
-      .map(({ profession, recipe, date, trainer, zone, req_skill, cost_copper }) => ({ date, profession, trainer, zone, recipe, req_skill, cost_copper })),
+      .map(({ profession, recipe_id, recipe, date, trainer, zone, req_skill, cost_copper }) => ({
+        date, profession, trainer, zone, recipe_id, recipe, req_skill, cost_copper,
+      })),
     vendors: patterns
       .map((p) => ({ date: "", vendor: "", zone: "", pattern: nameOf(p.name), cost_copper: "" }))
       .sort((a, b) => a.pattern.localeCompare(b.pattern)),
