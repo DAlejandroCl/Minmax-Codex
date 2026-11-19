@@ -93,7 +93,27 @@ Lectura:
     - **Habilidad mínima: el 100 % de los patrones trae `requirements.skill`** con profesión, `level` y texto («Requires Leatherworking (65)» para «Pattern: Fine Leather Boots»). Distribución por tramo de 25: 1–25: 19 · 26–50: 58 · 51–75: 97 · 76–100: 116 · 101–125: 112 · 126–150: 116 · 151–175: 123 · 176–200: 137 · 201–225: 169 · 226–250: 186 · 251–275: 203 · **276–300: 498**.
     - **Otros requisitos:** 184 patrones exigen reputación (facción y nivel), 118 exigen una habilidad previa (`requirements.ability`), 969 tienen ligadura (`binding`). El `preview_item` incluye además el ítem fabricado y sus reactivos (`recipe`, en 1.678) y el hechizo que enseña (`spells`, en 201: fórmulas de encantamiento).
     - **Enlace con recetas:** 1.784 de 1.834 enlazan por nombre; **1.788 de 2.493 recetas (≈ 72 %) tienen un patrón**. Los 50 sin enlazar son ítems nuevos de Forever (IDs ≥ 251735, p. ej. «Pattern: Beastculler's Adaptive Vest») cuyo nombre no coincide con el de la receta. Se añadió el enlace por **id del ítem fabricado** (`recipe.item.item.id`), más fiable que el nombre.
-    - **Consecuencia para R-18:** para ≈ 72 % de las recetas ya hay **habilidad mínima** de forma oficial. Siguen sin dato: los umbrales amarillo/verde/gris, **dónde se obtiene cada patrón** y la habilidad de las ≈ 705 recetas sin patrón (entrenador u otra vía). Hipótesis por validar en SP-4: la habilidad del patrón equivale al umbral naranja de la receta.
+    - **Consecuencia para R-18:** para ≈ 72 % de las recetas ya hay **habilidad mínima** de forma oficial. Siguen sin dato: los umbrales amarillo/verde/gris, **dónde se obtiene cada patrón** y la habilidad de las recetas sin patrón (entrenador u otra vía; cifra exacta en la Medición 4). Hipótesis por validar en SP-4: la habilidad del patrón equivale al umbral naranja de la receta.
+  - **Medición 4 (2026-11-18, enlace por ítem fabricado):** de los 1.834 patrones, **1.677 enlazan por el id del ítem fabricado, 125 por el hechizo que enseñan (fórmulas de encantamiento) y 0 por nombre**; quedan **32 sin enlazar**. Resultado: **1.797 de 2.493 recetas (72,1 %) con habilidad mínima** (corrige la cifra de 1.788 de la Medición 3, que usaba solo el nombre); **696 recetas sin dato**. 179 recetas exigen reputación.
+    - **Los 32 sin enlazar** son ítems nuevos de Forever (IDs 251735–251758, 252849 y 274491: «Pattern: Beastculler's Adaptive Vest», «Dinomender's Adaptive Tunic», «Centaur Hoofwarmers»…). No existe una receta del catálogo que produzca su ítem fabricado; pueden ser recetas aún no publicadas en la API o contenido futuro. Hay que revisarlos en el juego.
+    - **Cobertura por profesión** (recetas del catálogo con habilidad mínima / total):
+
+      | Profesión | Con habilidad mínima | Total | % |
+      |-----------|---------------------:|------:|--:|
+      | Cooking | 116 | 132 | 87,9 |
+      | Leatherworking | 463 | 592 | 78,2 |
+      | Tailoring | 349 | 471 | 74,1 |
+      | Blacksmithing | 372 | 507 | 73,4 |
+      | Alchemy | 138 | 196 | 70,4 |
+      | Fishing | 2 | 3 | 66,7 |
+      | Enchanting | 171 | 262 | 65,3 |
+      | Engineering | 168 | 275 | 61,1 |
+      | First Aid | 16 | 32 | 50,0 |
+      | Mining | 2 | 17 | 11,8 |
+      | Herbalism | 0 | 3 | 0 |
+      | Skinning | 0 | 3 | 0 |
+
+    - **Lectura:** las profesiones con menos cobertura (Mining, First Aid, Engineering) tienen muchas recetas de entrenador que no pasan por un patrón. Para ellas la habilidad mínima hay que obtenerla en el juego (la ventana del entrenador muestra «Requires … (n)»).
 - **Diario y criaturas:** `journal-expansion`, `journal-instance`, `journal-encounter` y `pvp-talent` devuelven solo `_links`; `search/creature` y `search/journal-encounter` devuelven una página sin resultados. No hay datos de jefes, instancias ni criaturas.
 - **Misiones:** `quest/index` trae las claves `categories`, `areas` y `types`; las rutas `quest-category` y `quest-area` que probé daban 404 porque en la API van como `quest/category/index` y similares (por probar).
 - **Iconos:** `media/item` entrega `assets`; antes de usarlos revisa la política de contenido ([SP-07](SP-07-legal.md)).
