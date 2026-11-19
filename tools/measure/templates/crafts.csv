@@ -1,3 +1,3 @@
 # Una fila por tanda de crafteos SIN cambio de color. skill_ups = puntos ganados en la tanda.
-date,profession,recipe,skill_start,color,crafts,skill_ups
-2026-11-19,Tailoring,Ejemplo de receta,40,yellow,20,9
+date,profession,recipe_id,recipe,skill_start,color,crafts,skill_ups
+2026-11-19,Tailoring,0,Ejemplo de receta,40,yellow,20,9
