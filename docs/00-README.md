@@ -1,7 +1,7 @@
-# Wiki Forever — Documentación de planificación (SDLC)
+# Minmax Codex — Documentación de planificación (SDLC)
 
 > **Estado:** v0.2 (MVP y ADRs aprobados) · **Fecha:** 2026-11-16 · **Autor:** Diego (DevACL) · **Fase SDLC:** 0–1 (Descubrimiento y Análisis)
-> Nombre de trabajo: **Wiki Forever** (puede cambiar).
+> Nombre del producto: **Minmax Codex** (antes «Wiki Forever»; renombrado el 2026-11-18 para evitar marcas de Blizzard en título y URL).
 
 Web app fullstack e interactiva para **World of Warcraft: Forever**: armory conectado a tus personajes, profesiones, talentos, listas BiS y guía de subida de profesiones al **menor costo posible**, con la meta a largo plazo de convertirse en una **wiki por clase** orientada al *min-maxing*.
 
