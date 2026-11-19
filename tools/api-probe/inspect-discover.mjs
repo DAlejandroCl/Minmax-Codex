@@ -2,9 +2,9 @@
 /**
  * Muestra un resumen legible de lo descargado por `probe discover` (carpeta out/discover/).
  *
- *   pnpm --filter @wow-forever/api-probe inspect                     # resumen general
- *   pnpm --filter @wow-forever/api-probe inspect -- --file=search_item --n=3
- *   pnpm --filter @wow-forever/api-probe inspect -- --file=item_10001 --chars=2500
+ *   pnpm --filter @minmax-codex/api-probe inspect                     # resumen general
+ *   pnpm --filter @minmax-codex/api-probe inspect -- --file=search_item --n=3
+ *   pnpm --filter @minmax-codex/api-probe inspect -- --file=item_10001 --chars=2500
  *
  * `--file` es un fragmento del nombre de archivo guardado; `--n` cuántos elementos de la
  * primera lista mostrar; `--chars` el máximo de caracteres a imprimir.
