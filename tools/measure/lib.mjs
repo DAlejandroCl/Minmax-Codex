@@ -2,16 +2,49 @@
 
 export const COLORS = ["orange", "yellow", "green", "grey"];
 
-/** Parsea un CSV simple (sin comillas); ignora líneas vacías y comentarios (#). */
+/** Divide una línea CSV respetando comillas dobles ("a,b" y "" como comilla escapada). */
+export function splitCsvLine(line) {
+  const cells = [];
+  let cur = "";
+  let quoted = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (quoted) {
+      if (ch === '"' && line[i + 1] === '"') {
+        cur += '"';
+        i += 1;
+      } else if (ch === '"') quoted = false;
+      else cur += ch;
+    } else if (ch === '"') quoted = true;
+    else if (ch === ",") {
+      cells.push(cur.trim());
+      cur = "";
+    } else cur += ch;
+  }
+  cells.push(cur.trim());
+  return cells;
+}
+
+/** Escapa una celda para CSV. */
+export function csvCell(value) {
+  const text = value == null ? "" : String(value);
+  return /[",\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+}
+
+export function toCsv(headers, rows) {
+  return [headers.join(","), ...rows.map((r) => headers.map((h) => csvCell(r[h])).join(","))].join("\n") + "\n";
+}
+
+/** Parsea un CSV (con comillas); ignora líneas vacías y comentarios (#). */
 export function parseCsv(text) {
   const lines = text
     .split(/\r?\n/)
     .map((l) => l.trim())
     .filter((l) => l && !l.startsWith("#"));
   if (lines.length === 0) return [];
-  const header = lines[0].split(",").map((h) => h.trim());
+  const header = splitCsvLine(lines[0]);
   return lines.slice(1).map((line, i) => {
-    const cells = line.split(",").map((c) => c.trim());
+    const cells = splitCsvLine(line);
     if (cells.length !== header.length) {
       throw new Error(`Línea ${i + 2}: se esperaban ${header.length} columnas y hay ${cells.length}`);
     }
@@ -43,6 +76,7 @@ export function skillBand(skill, size = 75) {
 export function summarizeCrafts(rows, bandSize = 75) {
   const cells = new Map();
   for (const r of rows) {
+    if (r.crafts === "" || r.color === "") continue; // fila pendiente de medir
     const color = r.color.toLowerCase();
     if (!COLORS.includes(color)) throw new Error(`Color desconocido: ${r.color}`);
     const crafts = Number(r.crafts);
@@ -85,6 +119,7 @@ export function sampleSize(e, p = 0.5, z = 1.96) {
 export function colorTransitions(rows) {
   const byRecipe = new Map();
   for (const r of rows) {
+    if (r.color === "" || r.skill === "") continue; // fila pendiente de medir
     const color = r.color.toLowerCase();
     if (!COLORS.includes(color)) throw new Error(`Color desconocido: ${r.color}`);
     const key = `${r.profession}|${r.recipe}`;
@@ -120,4 +155,68 @@ export function colorTransitions(rows) {
     });
   }
   return out;
+}
+
+/** Nombre en texto aunque la API devuelva un objeto por idioma. */
+export function nameOf(value) {
+  if (typeof value === "string") return value;
+  if (value && typeof value === "object") return value.en_US ?? Object.values(value).find((v) => typeof v === "string") ?? "";
+  return "";
+}
+
+export const RECIPE_HEADERS = [
+  "profession", "recipe_id", "recipe", "tier", "category", "crafted_item_id", "crafted_quantity",
+  "reagent_count", "min_skill", "pattern_item_id", "pattern_name", "reputation", "binding",
+];
+
+/**
+ * Construye los datasets CSV a partir del catálogo guardado por la sonda.
+ * `professions`: [{ name, tiers: [{ name, categories: [{ name, recipes: [{ id, name }] }] }] }]
+ * `recipes`: Map id → cuerpo de /recipe/{id} · `requirements`: Map recipeId → { minSkill, patternItemId, patternName, reputation, binding }
+ * `patterns`: [{ id, name, skill? }] (patrones de profesión, para vendors.csv)
+ */
+export function buildDatasets({ professions, recipes, requirements, patterns = [] }) {
+  const catalog = [];
+  for (const p of professions) {
+    const seen = new Set();
+    for (const t of p.tiers ?? []) {
+      for (const c of t.categories ?? []) {
+        for (const r of c.recipes ?? []) {
+          if (seen.has(r.id)) continue;
+          seen.add(r.id);
+          const body = recipes.get(r.id);
+          const req = requirements.get(r.id);
+          catalog.push({
+            profession: p.name,
+            recipe_id: r.id,
+            recipe: nameOf(body?.name ?? r.name),
+            tier: nameOf(t.name),
+            category: nameOf(c.name),
+            crafted_item_id: body?.crafted_item?.id ?? "",
+            crafted_quantity: body?.crafted_quantity ?? "",
+            reagent_count: body ? (body.reagents ?? []).length : "",
+            min_skill: req?.minSkill ?? "",
+            pattern_item_id: req?.patternItemId ?? "",
+            pattern_name: req?.patternName ?? "",
+            reputation: req?.reputation ?? "",
+            binding: req?.binding ?? "",
+          });
+        }
+      }
+    }
+  }
+  catalog.sort((a, b) => a.profession.localeCompare(b.profession) || a.recipe.localeCompare(b.recipe) || a.recipe_id - b.recipe_id);
+  const base = (r) => ({ profession: r.profession, recipe: r.recipe });
+  return {
+    recipes: catalog,
+    crafts: catalog.map((r) => ({ date: "", ...base(r), skill_start: "", color: "", crafts: "", skill_ups: "" })),
+    colors: catalog.map((r) => ({ date: "", ...base(r), req_skill: r.min_skill, skill: "", color: "" })),
+    trainers: catalog
+      .filter((r) => r.pattern_item_id === "")
+      .map((r) => ({ date: "", ...base(r), trainer: "", zone: "", req_skill: "", cost_copper: "" }))
+      .map(({ profession, recipe, date, trainer, zone, req_skill, cost_copper }) => ({ date, profession, trainer, zone, recipe, req_skill, cost_copper })),
+    vendors: patterns
+      .map((p) => ({ date: "", vendor: "", zone: "", pattern: nameOf(p.name), cost_copper: "" }))
+      .sort((a, b) => a.pattern.localeCompare(b.pattern)),
+  };
 }
