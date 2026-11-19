@@ -15,7 +15,7 @@
 
 ```mermaid
 flowchart LR
-  U([Jugador / Visitante]) --> W[Wiki Forever<br/>Web + API]
+  U([Jugador / Visitante]) --> W[Minmax Codex<br/>Web + API]
   E([Editor / Admin]) --> W
   A[Addon exportador<br/>SavedVariables .lua] -. archivo .-> U
   W --> DB[(PostgreSQL)]
@@ -56,7 +56,7 @@ flowchart TB
 ## 4. Estructura del monorepo (pnpm workspaces + Turborepo)
 
 ```
-wiki-forever/
+minmax-codex/
 ├─ apps/
 │  ├─ web/            # Astro + React 19 (islas), Tailwind v4, i18next
 │  ├─ api/            # Express 5 + Zod + capa de datos
