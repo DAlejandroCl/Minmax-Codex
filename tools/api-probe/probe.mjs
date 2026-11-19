@@ -5,15 +5,15 @@
  * (≥ 200 ms), reintento ante 429, sin paralelismo y sin scraping.
  *
  * Uso (desde la raíz del repo; requiere .env con BNET_CLIENT_ID / BNET_CLIENT_SECRET):
- *   pnpm --filter @wow-forever/api-probe probe                       # modo basic (ya ejecutado)
- *   pnpm --filter @wow-forever/api-probe probe catalog               # todas las recetas
- *   pnpm --filter @wow-forever/api-probe probe items                 # cobertura de ítems
- *   pnpm --filter @wow-forever/api-probe probe auction --compare     # casas por ruleset
- *   pnpm --filter @wow-forever/api-probe probe auction --house=110   # una casa (≈ 10 MB)
- *   pnpm --filter @wow-forever/api-probe probe auction --commodities # solo /commodities de la casa 110
- *   pnpm --filter @wow-forever/api-probe probe discover              # endpoints candidatos por feature
- *   pnpm --filter @wow-forever/api-probe probe patterns [--details]  # ítems «Recipe», enlace con recetas y requisito de habilidad
- *   pnpm --filter @wow-forever/api-probe probe -- --ns=dynamic-forever --path=/data/wow/ruleset/index
+ *   pnpm --filter @minmax-codex/api-probe probe                       # modo basic (ya ejecutado)
+ *   pnpm --filter @minmax-codex/api-probe probe catalog               # todas las recetas
+ *   pnpm --filter @minmax-codex/api-probe probe items                 # cobertura de ítems
+ *   pnpm --filter @minmax-codex/api-probe probe auction --compare     # casas por ruleset
+ *   pnpm --filter @minmax-codex/api-probe probe auction --house=110   # una casa (≈ 10 MB)
+ *   pnpm --filter @minmax-codex/api-probe probe auction --commodities # solo /commodities de la casa 110
+ *   pnpm --filter @minmax-codex/api-probe probe discover              # endpoints candidatos por feature
+ *   pnpm --filter @minmax-codex/api-probe probe patterns [--details]  # ítems «Recipe», enlace con recetas y requisito de habilidad
+ *   pnpm --filter @minmax-codex/api-probe probe -- --ns=dynamic-forever --path=/data/wow/ruleset/index
  *
  * Opciones: --limit=N (probar con pocas recetas/ítems), --profession=ID, --ruleset=ID,
  *           --static=<namespace> (p. ej. static-1.60.1_70399-forever), --delay=MS (solo pruebas).
