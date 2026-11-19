@@ -52,9 +52,9 @@ const patterns = hasPatterns ? read(patFile) : [];
 const data = buildDatasets({ professions, recipes, requirements, patterns });
 const HEADERS = {
   recipes: Object.keys(data.recipes[0] ?? {}),
-  crafts: ["date", "profession", "recipe", "skill_start", "color", "crafts", "skill_ups"],
-  colors: ["date", "profession", "recipe", "req_skill", "skill", "color"],
-  trainers: ["date", "profession", "trainer", "zone", "recipe", "req_skill", "cost_copper"],
+  crafts: ["date", "profession", "recipe_id", "recipe", "skill_start", "color", "crafts", "skill_ups"],
+  colors: ["date", "profession", "recipe_id", "recipe", "req_skill", "skill", "color"],
+  trainers: ["date", "profession", "trainer", "zone", "recipe_id", "recipe", "req_skill", "cost_copper"],
   vendors: ["date", "vendor", "zone", "pattern", "cost_copper"],
 };
 
