@@ -2,7 +2,7 @@
 
 > Investigación realizada el **2026-11-16**. WoW Forever lleva ~12 días en el mercado: **todo lo de esta página debe re-verificarse** antes de tomar decisiones irreversibles.
 >
-> **⚠ Corrección (2026-11-16, Fase 0):** la primera versión de este documento concluía que no había API de Blizzard para Forever (se basaba en una prueba del 2026-10-28, previa al lanzamiento). **Ya no es cierto**: desde el 5–7 de noviembre la API sirve datos estáticos, perfiles de personaje y subastas de Forever, aunque sin documentación oficial. Detalles y fuentes en [spikes/](spikes/README.md). La tabla de abajo está actualizada; las decisiones derivadas están en la propuesta [ADR-013](11-justificacion-de-decisiones-de-ingenieria.md#adr-013--api-first-con-addon-como-complemento-propuesta), pendiente de aprobación.
+> **⚠ Corrección (2026-11-16, Fase 0):** la primera versión de este documento concluía que no había API de Blizzard para Forever (se basaba en una prueba del 2026-10-28, previa al lanzamiento). **Ya no es cierto**: desde el 5–7 de noviembre la API sirve datos estáticos, perfiles de personaje y subastas de Forever, aunque sin documentación oficial. Detalles y fuentes en [spikes/](spikes/README.md). La tabla de abajo está actualizada; las decisiones derivadas están en el [ADR-013](11-justificacion-de-decisiones-de-ingenieria.md#adr-013--api-first-con-addon-como-complemento), aceptado el 2026-11-18.
 
 ## 1. Resumen ejecutivo
 
