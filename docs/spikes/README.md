@@ -7,7 +7,7 @@
 | SP-1 | ¿Cómo obtener datos estáticos de forma reproducible y legítima? | **Medido**: 2.493 recetas con reactivos; 3,7 % de reactivos en 404; sin umbrales ni fuentes en las recetas, pero 1.834 patrones traen la habilidad mínima de ≈ 72 % de las recetas (R-18 mitigado en parte) | [SP-01](SP-01-datos-estaticos.md) | Enlazar por ítem fabricado y revisar `recipe-requirements.json`; medir umbrales de color y recetas de entrenador (SP-4) |
 | SP-2 | ¿Qué cubre la API de personajes y qué solo un addon? | **Reorientado** | [SP-02](SP-02-personajes-api-vs-addon.md) | Comparar API vs addon con un personaje real |
 | SP-3 | ¿Cuál es la fuente primaria de precios? | **Casi validado**: 4 rulesets × 15 casas; casa real con 96.465 publicaciones y 84.286 de commodities; 78,6 % de los reactivos de recetas con precio en una casa | [SP-03](SP-03-precios.md) | Medir cadencia cada hora y cobertura en otras casas; ADR-013 aceptado |
-| SP-4 | ¿Cómo se calcula el skill-up por color? | **Guía lista** (requiere medición en el juego) | [SP-04](SP-04-skillup.md) | Muestreo in-game |
+| SP-4 | ¿Cómo se calcula el skill-up por color? | **Plan listo** (requiere medición en el juego) | [SP-04](SP-04-skillup.md), [plan](SP-04-plan-de-medicion.md) | Ejecutar M1–M4 |
 | SP-5 | ¿El optimizador iguala/mejora guías publicadas? | **Bloqueado** por SP-1 y SP-4 | — | — |
 | SP-6 | ¿Astro + islas o SPA? | Pendiente | — | Prototipo de una página de entidad + calculadora |
 | SP-7 | Legal: términos y política de contenido | **Revisión parcial**: Términos de la API leídos; faltan EULA y política de fan content | [SP-07](SP-07-legal.md) | Confirmaciones con Blizzard |
