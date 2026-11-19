@@ -1,4 +1,4 @@
-# Wiki Forever
+# Minmax Codex
 
 Web app interactiva para **World of Warcraft: Forever**: armory conectado a tus personajes, profesiones, talentos, listas BiS y guías de subida de profesiones al menor costo posible, con la meta de convertirse en una wiki por clase orientada al min-maxing.
 
