@@ -23,7 +23,7 @@ Todo esto proviene de terceros sobre una API **no documentada**: puede cambiar s
 
 ## 3. Implicaciones para el diseño
 
-1. **La clave de mercado es la casa de subastas (facción/grupo), no el ruleset.** `price_snapshot.market` pasa a `auction_house_id` (+ región). Se corrige el modelo de [05](../05-modelo-de-dominio-y-datos.md) cuando se apruebe ADR-013.
+1. **La clave de mercado es la casa de subastas (facción/grupo), no el ruleset.** `price_snapshot.market` pasa a `auction_house_id` (+ región). Se corrige el modelo de [05](../05-modelo-de-dominio-y-datos.md) (ADR-013, aceptado).
 2. **Volumen real (medido en una casa):** una casa trae ≈ 96.000 subastas y ≈ 5.300 ítems distintos (más que los ≈ 1.500 del informe comunitario). Si las demás casas se parecen (no verificado), una lectura de las 15 casas son ≈ 1,4 millones de subastas y ≈ 140 MB de JSON; guardar un precio por (casa, ítem, hora) serían ≈ 80.000 filas/lectura y ≈ 1,9 millones/día. El límite gratuito de 500 MB se agota en pocos días → **la política de ADR-012 sigue siendo necesaria** y debe reducirse a "último estado por (casa, ítem) + agregados diarios". Además, solo importan los ≈ 2.700 ítems de recetas, no los 5.300: filtrar al ingerir reduce el volumen a la mitad.
 3. **Ingesta:** un job horario descarga 15 casas (hasta ≈ 150 MB/h) y reduce a (ítem, casa) → mínimo, mediana y cantidad. Debe ejecutarse en GitHub Actions, no en funciones (límite de 4,5 MB por petición/respuesta en Vercel Functions).
 4. **Nombres de ítems incompletos:** la capa de presentación debe tolerar ítems sin nombre (mostrar ID y marcar "sin resolver").
@@ -33,7 +33,7 @@ Todo esto proviene de terceros sobre una API **no documentada**: puede cambiar s
 Escaneos in-game de usuarios (addon) y override manual (RF-PRI-03) siguen siendo necesarios si Blizzard retira o limita la API.
 
 ## 5. Recomendación
-Adoptar **API oficial como fuente primaria de precios** (propuesta ADR-013), con override manual y escaneo por addon como respaldo.
+Adoptar **API oficial como fuente primaria de precios** (ADR-013, aceptado el 2026-11-18), con override manual y escaneo por addon como respaldo.
 
 ## 6. Resultados de la sonda propia (2026-11-17, región `us`)
 
