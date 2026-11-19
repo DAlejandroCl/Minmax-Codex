@@ -11,6 +11,7 @@
 | SP-5 | ¿El optimizador iguala/mejora guías publicadas? | **Bloqueado** por SP-1 y SP-4 | — | — |
 | SP-6 | ¿Astro + islas o SPA? | Pendiente | — | Prototipo de una página de entidad + calculadora |
 | SP-7 | Legal: términos y política de contenido | **Revisión parcial**: Términos de la API leídos; faltan EULA y política de fan content | [SP-07](SP-07-legal.md) | Confirmaciones con Blizzard |
+| SP-8 | ¿Qué hace el addon SkillUp y cómo nos alineamos? | **Investigado** (GPL-3.0; datos del DB2 del cliente) | [SP-08](SP-08-skillup-forever.md) | Cerrar SP-07 y contactar al autor |
 
 ## Cambio de situación (2026-11-16)
 
