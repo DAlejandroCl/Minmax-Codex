@@ -12,6 +12,8 @@
 - La API estática **no expone umbrales de color en ninguna receta** ([SP-01](SP-01-datos-estaticos.md) §3).
 - Los ítems-patrón sí traen la **habilidad mínima** (`requirements.skill.level`): 1.797 de 2.493 recetas (72,1 %) tienen ese dato, incluidos ejemplos como «Fine Leather Boots» = 65. Mining (2 de 17), First Aid (16 de 32) y Engineering (168 de 275) son las más incompletas.
 
+- Los umbrales existen en el DB2 del cliente (`SkillLineAbility`) y el addon SkillUp usa `p = (gris − skill)/(gris − amarillo)` ([SP-08](SP-08-skillup-forever.md)); su uso depende de SP-07.
+
 **Hipótesis por validar**
 - H1. La habilidad del patrón equivale al umbral **naranja** de la receta (por validación contra el color observado en el juego).
 - H2. Los umbrales amarillo, verde y gris se pueden derivar de la habilidad mínima con una regla fija, o hay que medirlos receta por receta.
