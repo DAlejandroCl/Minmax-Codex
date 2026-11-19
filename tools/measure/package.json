@@ -1,0 +1,13 @@
+{
+  "name": "@minmax-codex/measure",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Análisis de las mediciones in-game de skill-up y umbrales de color (SP-4)",
+  "scripts": {
+    "analyze": "node analyze.mjs",
+    "lint": "eslint analyze.mjs lib.mjs lib.test.mjs",
+    "typecheck": "node --check analyze.mjs && node --check lib.mjs && node --check lib.test.mjs",
+    "test": "node --test"
+  }
+}
