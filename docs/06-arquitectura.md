@@ -161,8 +161,8 @@ Logs estructurados con `requestId`; métricas de ETL (filas, rechazos, duración
 | ADR-009 | Autenticación: **Supabase Auth**; Battle.net OAuth diferido a R5 | **Aceptada** |
 | ADR-010 | Optimizador: camino más corto en DAG de segmentos | **Aceptada** |
 | ADR-011 | Parser Lua propio sin evaluación | **Aceptada** |
-| ADR-012 | Retención y agregación de precios (30 días crudos + agregados) | **Aceptada** (en revisión por ADR-013) |
-| ADR-013 | API-first con addon como complemento (reemplazaría parcialmente a ADR-002 y ajustaría ADR-009) | **Propuesta — pendiente de aprobación** |
+| ADR-012 | Retención y agregación de precios (30 días crudos + agregados) | **Aceptada** (ajustada por ADR-013) |
+| ADR-013 | API-first con addon como complemento (reemplaza parcialmente a ADR-002 y ajusta ADR-009 y ADR-012) | **Aceptada** (2026-11-18) |
 
 ### ADR-002 (detalle)
 
