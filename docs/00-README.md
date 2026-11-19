@@ -32,10 +32,10 @@ Web app fullstack e interactiva para **World of Warcraft: Forever**: armory cone
 
 ## Hallazgo clave que condiciona todo el plan
 
-> **Actualizado en Fase 0 (2026-11-16):** la versión inicial de este documento decía que no existía API de Blizzard para Forever. **Ya existe**, aunque sin documentación oficial: datos estáticos, perfiles de personaje y subastas (desde el 5–7 de noviembre). Ver [07](07-fuentes-de-datos-y-viabilidad.md), los [spikes](spikes/README.md) y la propuesta ADR-013 (pendiente de aprobación).
+> **Actualizado en Fase 0 (2026-11-16):** la versión inicial de este documento decía que no existía API de Blizzard para Forever. **Ya existe**, aunque sin documentación oficial: datos estáticos, perfiles de personaje y subastas (desde el 5–7 de noviembre). Ver [07](07-fuentes-de-datos-y-viabilidad.md), los [spikes](spikes/README.md) y el ADR-013 (aceptado el 2026-11-18).
 
 La API de Forever es **no documentada** y sus Términos limitan la retención de datos y la monetización ([SP-07](spikes/SP-07-legal.md)). Por eso el plan:
 
 1. entrega valor **sin necesidad de conectar personajes** desde el MVP (calculadora de profesiones y base de datos),
-2. propone **API-first con addon como complemento y respaldo** (ADR-013, pendiente de aprobación; ADR-002 sigue vigente mientras tanto), y
+2. propone **API-first con addon como complemento y respaldo** (ADR-013, aceptado el 2026-11-18; reemplaza parcialmente a ADR-002), y
 3. aísla la API tras una capa con contratos probados, porque puede cambiar sin aviso.
