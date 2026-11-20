@@ -146,3 +146,19 @@ Con las capturas de la lista de compras de SkillUp (`reference/skillup-route-rea
 - La ruta necesita 54 → **27 crafteos** = 27 Rugged Hide + 27 Refined Deeprock Salt.
 - Comprar cuesta 37,5 oro c/u = **75 oro por crafteo** (2 unidades). Fabricar compensa si `precio(Rugged Hide) + precio(Refined Deeprock Salt) < 75 oro`. Ejemplo ilustrativo (no medido): con 5 + 10 oro por crafteo, 27 crafteos cuestan 405 oro y la ruta bajaría de 2.780 a ≈ 1.160 oro.
 - Falta: precio de ambos materiales en la casa de subastas del usuario (y si el Rugged Hide se puede conseguir despellejando, ya que el usuario sube Skinning) y la habilidad requerida de la receta (no está en la API: es de entrenador, M3).
+
+### 9f. Precios reales: la hipótesis de fabricar era errónea; el problema es un precio desactualizado (2026-11-20)
+Precios observados por el usuario (`reference/prices-observed-2026-11-20.csv`): Rugged Hide 5 plata, Refined Deeprock Salt 63 oro, **Cured Rugged Hide 1 oro 15 plata**.
+
+| Opción para 54 Cured Rugged Hide | Coste |
+|----------------------------------|------:|
+| Precio usado por SkillUp (37,5 oro c/u) | 2.025 oro |
+| Comprar al precio actual (1,15 oro c/u) | **62,1 oro** |
+| Fabricar (27 crafteos × (0,05 + 63) oro) | 1.701 oro |
+
+- **Corrección de lo dicho en 9e:** fabricar *no* compensa (el Refined Deeprock Salt cuesta 63 oro). La oportunidad no era fabricar, sino que **SkillUp usó un precio obsoleto** (la propia pantalla avisa «rescan to update old prices»).
+- **Efecto:** el coste de la ruta pasa de ≈ 2.780 a **≈ 817 oro** (2.780,1 − 2.025 + 62,1), una reducción del 71 %, solo por actualizar un precio.
+- **Requisitos que se derivan para nuestra guía:**
+  1. Mostrar la **antigüedad** de cada precio y avisar cuando un precio se aparta mucho del resto (R-04).
+  2. Calcular el coste de comprar N unidades recorriendo las ofertas (profundidad del mercado), no solo el precio mínimo: 54 unidades a 1,15 oro supone que existan 54 ofertas a ese precio. Esto no está medido; la API de subastas (SP-03) entrega todas las ofertas por casa y permite calcularlo.
+  3. Comparar siempre **comprar vs fabricar** cada intermedio con precios vigentes y elegir el más barato.
