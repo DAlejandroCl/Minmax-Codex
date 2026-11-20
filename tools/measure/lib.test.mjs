@@ -198,3 +198,22 @@ test("expectedCrafts suma 1/p y es Infinity si hay gris", () => {
   assert.ok(Math.abs(expectedCrafts(100, 102, t) - (1 + 1 / 0.98)) < 1e-9);
   assert.equal(expectedCrafts(149, 151, t), Infinity);
 });
+
+import { routeReagents } from "./lib.mjs";
+
+test("routeReagents suma reactivos y descuenta intermedios", () => {
+  const hide = { id: 1, crafted_item: { name: "Cured Hide" }, crafted_quantity: { value: 1 }, reagents: [{ reagent: { name: "Leather" }, quantity: 2 }] };
+  const shoulders = { id: 2, reagents: [{ reagent: { name: "Cured Hide" }, quantity: 1 }, { reagent: { name: "Thread" }, quantity: 3 }] };
+  const recipes = new Map([[1, hide], [2, shoulders]]);
+  const steps = [
+    { type: "material", recipe_id: "1", crafts: "10" },
+    { type: "train", recipe_id: "", crafts: "" },
+    { type: "craft", recipe_id: "2", crafts: "10" },
+    { type: "craft", recipe_id: "99", crafts: "1" },
+  ];
+  const { needs, missing } = routeReagents(steps, recipes);
+  assert.equal(needs.get("Leather"), 20);
+  assert.equal(needs.get("Thread"), 30);
+  assert.equal(needs.get("Cured Hide"), 0);
+  assert.deepEqual(missing, ["99"]);
+});
