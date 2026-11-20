@@ -167,3 +167,17 @@ test("selectM1 respeta minReq y maxReq", () => {
   assert.deepEqual(selectM1(rows, { profession: "P", count: 5, maxReq: 150 }).map((r) => r.recipe_id), ["1", "2"]);
   assert.deepEqual(selectM1(rows, { profession: "P", count: 5, minReq: 150 }).map((r) => r.recipe_id), ["3"]);
 });
+
+import { expandCheckpoint } from "./lib.mjs";
+
+test("expandCheckpoint expande códigos de color y omite los no visibles", () => {
+  const sheet = [
+    { profession: "P", recipe_id: "1", recipe: "A", req_skill: "10" },
+    { profession: "P", recipe_id: "2", recipe: "B", req_skill: "20" },
+    { profession: "P", recipe_id: "3", recipe: "C", req_skill: "30" },
+  ];
+  const rows = expandCheckpoint(sheet, { skill: 25, codes: "g,y,-", date: "2026-11-20" });
+  assert.deepEqual(rows.map((r) => [r.recipe_id, r.color, r.skill]), [["1", "green", "25"], ["2", "yellow", "25"]]);
+  assert.throws(() => expandCheckpoint(sheet, { skill: 1, codes: "o,y" }), /3 recetas/);
+  assert.throws(() => expandCheckpoint(sheet, { skill: 1, codes: "o,y,q" }), /desconocido/);
+});
