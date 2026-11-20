@@ -8,8 +8,9 @@
     "analyze": "node analyze.mjs",
     "build-csv": "node build-csv.mjs",
     "select-m1": "node select-m1.mjs",
-    "lint": "eslint analyze.mjs build-csv.mjs select-m1.mjs lib.mjs lib.test.mjs",
-    "typecheck": "node --check analyze.mjs && node --check build-csv.mjs && node --check select-m1.mjs && node --check lib.mjs && node --check lib.test.mjs",
+    "m1-add": "node m1-add.mjs",
+    "lint": "eslint analyze.mjs build-csv.mjs select-m1.mjs m1-add.mjs lib.mjs lib.test.mjs",
+    "typecheck": "node --check analyze.mjs && node --check build-csv.mjs && node --check select-m1.mjs && node --check m1-add.mjs && node --check lib.mjs && node --check lib.test.mjs",
     "test": "node --test"
   }
 }
