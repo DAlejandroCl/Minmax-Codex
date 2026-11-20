@@ -181,3 +181,20 @@ test("expandCheckpoint expande códigos de color y omite los no visibles", () =>
   assert.throws(() => expandCheckpoint(sheet, { skill: 1, codes: "o,y" }), /3 recetas/);
   assert.throws(() => expandCheckpoint(sheet, { skill: 1, codes: "o,y,q" }), /desconocido/);
 });
+
+import { skillUpChance, expectedCrafts } from "./lib.mjs";
+
+test("skillUpChance: naranja 1, interpolación lineal y gris 0", () => {
+  const t = { yellow: 100, grey: 150 };
+  assert.equal(skillUpChance(99, t), 1);
+  assert.equal(skillUpChance(100, t), 1);
+  assert.equal(skillUpChance(125, t), 0.5);
+  assert.equal(skillUpChance(150, t), 0);
+});
+
+test("expectedCrafts suma 1/p y es Infinity si hay gris", () => {
+  const t = { yellow: 100, grey: 150 };
+  assert.equal(expectedCrafts(90, 100, t), 10);
+  assert.ok(Math.abs(expectedCrafts(100, 102, t) - (1 + 1 / 0.98)) < 1e-9);
+  assert.equal(expectedCrafts(149, 151, t), Infinity);
+});
