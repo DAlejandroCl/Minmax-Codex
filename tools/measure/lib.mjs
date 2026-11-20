@@ -314,3 +314,34 @@ export function expectedCrafts(from, to, thresholds) {
   for (let s = from; s < to; s++) total += 1 / skillUpChance(s, thresholds);
   return total;
 }
+
+/**
+ * Reactivos totales de una ruta: Σ crafteos × cantidad por receta. Los pasos `material` producen ítems
+ * intermedios (p. ej. Cured Heavy Hide) que se descuentan de la necesidad de los pasos que los consumen.
+ * `steps`: filas de la ruta (type, recipe_id, crafts) · `recipes`: Map id → cuerpo de /recipe/{id}.
+ * Devuelve { needs: Map nombre → cantidad, missing: ids sin receta }.
+ */
+export function routeReagents(steps, recipes) {
+  const needs = new Map();
+  const produced = new Map();
+  const missing = [];
+  const add = (map, key, qty) => map.set(key, (map.get(key) ?? 0) + qty);
+  for (const step of steps) {
+    if (!["craft", "material"].includes(step.type)) continue;
+    const recipe = recipes.get(Number(step.recipe_id));
+    if (!recipe) {
+      missing.push(step.recipe_id);
+      continue;
+    }
+    const crafts = Number(step.crafts);
+    for (const r of recipe.reagents ?? []) add(needs, nameOf(r.reagent?.name), crafts * (r.quantity ?? 0));
+    if (step.type === "material") {
+      const q = quantityOf(recipe.crafted_quantity);
+      add(produced, nameOf(recipe.crafted_item?.name), crafts * (typeof q === "number" ? q : 1));
+    }
+  }
+  for (const [name, qty] of produced) {
+    if (needs.has(name)) needs.set(name, Math.max(0, needs.get(name) - qty));
+  }
+  return { needs, missing };
+}
