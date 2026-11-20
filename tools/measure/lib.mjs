@@ -297,3 +297,20 @@ export function expandCheckpoint(sheetRows, { skill, codes, date = "" }) {
   });
   return out;
 }
+
+/**
+ * Probabilidad de subir un punto a la habilidad `s` con una receta de umbrales amarillo `yellow` y gris `grey`
+ * (naranja = habilidad < yellow → 1; gris → 0; entre ambos: (gris − s)/(gris − amarillo)). Verde no cambia la fórmula.
+ */
+export function skillUpChance(s, { yellow, grey }) {
+  if (s < yellow) return 1;
+  if (s >= grey) return 0;
+  return (grey - s) / (grey - yellow);
+}
+
+/** Crafteos esperados para ir de `from` a `to` (puntos s = from … to−1): Σ 1/p(s). Infinity si algún p es 0. */
+export function expectedCrafts(from, to, thresholds) {
+  let total = 0;
+  for (let s = from; s < to; s++) total += 1 / skillUpChance(s, thresholds);
+  return total;
+}
