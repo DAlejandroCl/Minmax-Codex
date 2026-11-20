@@ -217,3 +217,17 @@ test("routeReagents suma reactivos y descuenta intermedios", () => {
   assert.equal(needs.get("Cured Hide"), 0);
   assert.deepEqual(missing, ["99"]);
 });
+
+import { findRecipes, recipesCrafting } from "./lib.mjs";
+
+test("findRecipes busca por id, nombre exacto y parcial", () => {
+  const rs = [
+    { id: 1, name: "Cured Rugged Hide", crafted_item: { name: "Cured Rugged Hide" } },
+    { id: 2, name: "Rugged Armor Kit" },
+    { id: 3, name: "Rugged Leather Pants" },
+  ];
+  assert.deepEqual(findRecipes(rs, "2").map((r) => r.id), [2]);
+  assert.deepEqual(findRecipes(rs, "cured rugged hide").map((r) => r.id), [1]);
+  assert.deepEqual(findRecipes(rs, "rugged").map((r) => r.id), [1, 2, 3]);
+  assert.deepEqual(recipesCrafting(rs, "cured rugged hide").map((r) => r.id), [1]);
+});
