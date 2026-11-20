@@ -275,3 +275,25 @@ export function selectM1(rows, { profession, count = 15, minReq = 0, maxReq = In
   }
   return [...bins.entries()].sort((a, b) => a[0] - b[0]).map(([, r]) => r);
 }
+
+const COLOR_CODES = { o: "orange", y: "yellow", g: "green", x: "grey" };
+
+/**
+ * Expande una captura rápida de M1: una habilidad y una lista de códigos de color en el orden de la hoja
+ * (`o` naranja, `y` amarillo, `g` verde, `x` gris, `-` no visible/no aprendida).
+ */
+export function expandCheckpoint(sheetRows, { skill, codes, date = "" }) {
+  const list = codes.split(",").map((c) => c.trim().toLowerCase());
+  if (list.length !== sheetRows.length) {
+    throw new Error(`La hoja tiene ${sheetRows.length} recetas y diste ${list.length} colores`);
+  }
+  const out = [];
+  list.forEach((code, i) => {
+    if (code === "-" || code === "") return;
+    const color = COLOR_CODES[code];
+    if (!color) throw new Error(`Código de color desconocido «${code}» (usa o, y, g, x o -)`);
+    const r = sheetRows[i];
+    out.push({ date, profession: r.profession, recipe_id: r.recipe_id, recipe: r.recipe, req_skill: r.req_skill, skill: String(skill), color });
+  });
+  return out;
+}
