@@ -187,7 +187,11 @@ export const RECIPE_HEADERS = [
  * `recipes`: Map id → cuerpo de /recipe/{id} · `requirements`: Map recipeId → { minSkill, patternItemId, patternName, reputation, binding }
  * `patterns`: [{ id, name, skill? }] (patrones de profesión, para vendors.csv)
  */
-export function buildDatasets({ professions, recipes, requirements, patterns = [] }) {
+export const EXCLUDED_CATEGORIES = ["SEASON OF DISCOVERY"];
+
+export function buildDatasets({ professions, recipes, requirements, patterns = [], excludeCategories = EXCLUDED_CATEGORIES }) {
+  const excludedSet = new Set(excludeCategories.map((c) => c.toLowerCase()));
+  const excluded = [];
   const catalog = [];
   for (const p of professions) {
     const seen = new Set();
@@ -198,7 +202,7 @@ export function buildDatasets({ professions, recipes, requirements, patterns = [
           seen.add(r.id);
           const body = recipes.get(r.id);
           const req = requirements.get(r.id);
-          catalog.push({
+          const row = {
             profession: p.name,
             recipe_id: r.id,
             recipe: nameOf(body?.name ?? r.name),
@@ -212,12 +216,16 @@ export function buildDatasets({ professions, recipes, requirements, patterns = [
             pattern_name: req?.patternName ?? "",
             reputation: req?.reputation ?? "",
             binding: req?.binding ?? "",
-          });
+          };
+          (excludedSet.has(row.category.toLowerCase()) ? excluded : catalog).push(row);
         }
       }
     }
   }
   catalog.sort((a, b) => a.profession.localeCompare(b.profession) || a.recipe.localeCompare(b.recipe) || a.recipe_id - b.recipe_id);
+  // Un patrón se descarta solo si todas las recetas que lo usan están excluidas.
+  const keptPatterns = new Set(catalog.map((r) => r.pattern_item_id).filter((x) => x !== ""));
+  const droppedPatterns = new Set(excluded.map((r) => r.pattern_item_id).filter((x) => x !== "" && !keptPatterns.has(x)));
   const base = (r) => ({ profession: r.profession, recipe_id: r.recipe_id, recipe: r.recipe });
   return {
     recipes: catalog,
@@ -229,7 +237,9 @@ export function buildDatasets({ professions, recipes, requirements, patterns = [
       .map(({ profession, recipe_id, recipe, date, trainer, zone, req_skill, cost_copper }) => ({
         date, profession, trainer, zone, recipe_id, recipe, req_skill, cost_copper,
       })),
+    excluded,
     vendors: patterns
+      .filter((p) => !droppedPatterns.has(p.id))
       .map((p) => ({ date: "", vendor: "", zone: "", pattern: nameOf(p.name), cost_copper: "" }))
       .sort((a, b) => a.pattern.localeCompare(b.pattern)),
   };
