@@ -160,3 +160,10 @@ test("selectM1 reparte por tramos y prefiere pocos reactivos sin reputación", (
   assert.deepEqual(out.map((r) => r.recipe_id), ["2", "4", "5"]);
   assert.deepEqual(selectM1(rows, { profession: "Cooking" }), []);
 });
+
+test("selectM1 respeta minReq y maxReq", () => {
+  const mk = (id, req) => ({ profession: "P", recipe_id: String(id), recipe: `R${id}`, min_skill: String(req), reagent_count: "1", reputation: "" });
+  const rows = [mk(1, 10), mk(2, 100), mk(3, 200)];
+  assert.deepEqual(selectM1(rows, { profession: "P", count: 5, maxReq: 150 }).map((r) => r.recipe_id), ["1", "2"]);
+  assert.deepEqual(selectM1(rows, { profession: "P", count: 5, minReq: 150 }).map((r) => r.recipe_id), ["3"]);
+});
