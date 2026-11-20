@@ -1,0 +1,15 @@
+# Ruta de SkillUp (Forever) transcrita por el usuario de su pantalla el 2026-11-20 (build 1.60.1, Leatherworking, habilidad 148).
+# Son valores CALCULADOS por el addon (no observados): sirven para validar el optimizador, no como fuente de datos (ver SP-08 y R-19).
+# kind=skill: tramo de habilidad con crafteos; kind=material: ítem intermedio sin tramo (no cuenta para la habilidad).
+kind,skill_from,skill_to,crafts,recipe_id,recipe
+skill,148,155,13,2168,Hillman's Cloak
+material,155,155,10,2197,Cured Heavy Hide
+skill,155,165,10,4163,Barbaric Shoulders
+skill,165,195,36,4010,Barbaric Harness
+skill,195,196,1,5670,Nightscape Headband
+skill,196,197,4,4010,Barbaric Harness
+skill,197,210,19,5670,Nightscape Headband
+skill,210,240,48,5685,Nightscape Pants
+skill,240,274,85,10759,Wicked Leather Gauntlets
+skill,274,290,34,13042,Green Dragonscale Gauntlets
+skill,290,300,10,13043,Blue Dragonscale Leggings
