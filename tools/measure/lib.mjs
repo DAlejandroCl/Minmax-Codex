@@ -248,12 +248,14 @@ export function buildDatasets({ professions, recipes, requirements, patterns = [
 /**
  * Elige recetas para M1 (umbrales de color) repartidas por todo el rango de habilidad mínima de una profesión.
  * Divide el rango en `count` tramos y toma, por tramo, la receta con menos reactivos que no exija reputación.
+ * `minReq`/`maxReq` limitan el rango (la ventana solo muestra recetas aprendidas o enseñables).
  * `rows`: filas de recipes.csv.
  */
-export function selectM1(rows, { profession, count = 15 }) {
+export function selectM1(rows, { profession, count = 15, minReq = 0, maxReq = Infinity }) {
   const pool = rows
     .filter((r) => r.profession.toLowerCase() === profession.toLowerCase() && r.min_skill !== "")
-    .map((r) => ({ ...r, req: Number(r.min_skill), reagents: Number(r.reagent_count) || 0 }));
+    .map((r) => ({ ...r, req: Number(r.min_skill), reagents: Number(r.reagent_count) || 0 }))
+    .filter((r) => r.req >= minReq && r.req <= maxReq);
   if (pool.length === 0) return [];
   const lo = Math.min(...pool.map((r) => r.req));
   const hi = Math.max(...pool.map((r) => r.req));
