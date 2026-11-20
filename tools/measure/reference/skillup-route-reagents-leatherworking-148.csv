@@ -1,0 +1,9 @@
+# Reactivos totales de la ruta y su fuente según SkillUp (have / need), transcritos de las capturas del 2026-11-20.
+# Sirve para validar recetas × crafteos × reactivos contra el catálogo de la API.
+reagent,have,need,source
+Fine Thread,1,126,vendor
+Salt,0,30,vendor
+Silken Thread,0,232,vendor
+Rune Thread,0,173,vendor
+Black Dye,0,85,AH
+Heavy Leather,38,705,AH
