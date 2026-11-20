@@ -82,3 +82,27 @@ Con `recipes.csv` (2.493 recetas):
 | Sesgo por pocas recetas | Recetas de distinto requisito y profesión |
 | Parche que cambia los valores | Fecha y build en cada fila; repetir una celda tras un parche |
 | Muestra pequeña | Reportar siempre el intervalo, nunca solo `p̂` |
+
+## 9. Referencia externa: ruta de SkillUp (2026-11-20)
+El product owner transcribió la ruta que calcula SkillUp para Leatherworking 148→300 (`tools/measure/reference/skillup-route-leatherworking-148.csv`):
+
+| Tramo | Crafteos | Receta | Crafteos/punto |
+|-------|---------:|--------|---------------:|
+| 148–155 | 13 | Hillman's Cloak | 1,86 |
+| 155–165 | 10 | Barbaric Shoulders | 1,00 |
+| 165–195 | 36 | Barbaric Harness | 1,20 |
+| 195–196 | 1 | Nightscape Headband | 1,00 |
+| 196–197 | 4 | Barbaric Harness | 4,00 |
+| 197–210 | 19 | Nightscape Headband | 1,46 |
+| 210–240 | 48 | Nightscape Pants | 1,60 |
+| 240–274 | 85 | Wicked Leather Gauntlets | 2,50 |
+| 274–290 | 34 | Green Dragonscale Gauntlets | 2,13 |
+| 290–300 | 10 | Blue Dragonscale Leggings | 1,00 |
+
+(155: 10× Cured Heavy Hide es un material intermedio, no cuenta para la habilidad.) Total ≈ 260 crafteos para 152 puntos.
+
+**Cómo se usa.** Son valores *calculados* por el addon con datos del cliente, no observados; por eso sirven como **prueba de validación** del optimizador (criterio de SP-05: igualar una guía publicada) y no como fuente del dataset (R-19, SP-07). Con `expectedCrafts` (Σ 1/p) se compara tramo a tramo cuando haya umbrales medidos.
+
+**Qué no se puede deducir.** Cada tramo da una ecuación con dos incógnitas por receta (amarillo y gris). Ejemplo: *Wicked Leather Gauntlets* (requisito 235) da 85 crafteos en 240–274, que encajan con varias parejas (amarillo = req y gris = req + 45; o amarillo = req + 15 y gris = req + 40). Hace falta medir el color en el juego (M1) para fijarlos; la ruta sirve de contraste.
+
+**Lecturas útiles ya.** Barbaric Shoulders da 1,0 crafteos/punto en 155–165 (naranja en todo el tramo); *Barbaric Harness* cuesta 4 crafteos por el punto 196→197 (casi gris) y SkillUp cambia a *Nightscape Headband* en ese punto, lo que confirma que el optimizador cambia de receta cuando `p` cae.
