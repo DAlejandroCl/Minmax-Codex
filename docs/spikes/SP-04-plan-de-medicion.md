@@ -139,3 +139,10 @@ Con las capturas de la lista de compras de SkillUp (`reference/skillup-route-rea
 - **Oportunidad para el optimizador:** el 73 % del coste es comprar *Cured Rugged Hide* en la subasta. Existe una receta de entrenador «Cured Rugged Hide» (está entre las 543 sin patrón), así que habría que comprobar si fabricarla con materiales más baratos reduce el coste. Es justo lo que SkillUp no parece valorar (no hay precio de la materia prima en su lista) y lo que nuestra guía debe resolver con el precio de cada intermedio y con detección de precios atípicos (R-04).
 - **Origen de cada reactivo:** SkillUp separa «Vendor» (Fine/Silken/Rune Thread, Salt) de «Auction house» (el resto), y exporta una lista para Auctionator. Nuestra guía debería producir un listado equivalente.
 - **Casa de subastas:** los precios son de su reino y de su casa; los nuestros salen de la API por casa de subastas (SP-03), por lo que no serán idénticos.
+
+### 9e. Receta de Cured Rugged Hide (2026-11-20)
+`recipe-info` sobre el catálogo: receta **#10756 «Cured Rugged Hide»** (Leatherworking, categoría Reagents, sin patrón → entrenador): **1 Rugged Hide + 1 Refined Deeprock Salt → 2 Cured Rugged Hide**.
+
+- La ruta necesita 54 → **27 crafteos** = 27 Rugged Hide + 27 Refined Deeprock Salt.
+- Comprar cuesta 37,5 oro c/u = **75 oro por crafteo** (2 unidades). Fabricar compensa si `precio(Rugged Hide) + precio(Refined Deeprock Salt) < 75 oro`. Ejemplo ilustrativo (no medido): con 5 + 10 oro por crafteo, 27 crafteos cuestan 405 oro y la ruta bajaría de 2.780 a ≈ 1.160 oro.
+- Falta: precio de ambos materiales en la casa de subastas del usuario (y si el Rugged Hide se puede conseguir despellejando, ya que el usuario sube Skinning) y la habilidad requerida de la receta (no está en la API: es de entrenador, M3).
