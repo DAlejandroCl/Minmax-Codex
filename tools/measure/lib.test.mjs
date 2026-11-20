@@ -150,3 +150,13 @@ test("buildDatasets excluye la categoría SoD y sus patrones exclusivos", () => 
   const all = buildDatasets({ professions, recipes: new Map(), requirements, patterns, excludeCategories: [] });
   assert.equal(all.recipes.length, 3);
 });
+
+import { selectM1 } from "./lib.mjs";
+
+test("selectM1 reparte por tramos y prefiere pocos reactivos sin reputación", () => {
+  const mk = (id, req, reagents, reputation = "") => ({ profession: "Tailoring", recipe_id: String(id), recipe: `R${id}`, min_skill: String(req), reagent_count: String(reagents), reputation });
+  const rows = [mk(1, 1, 3), mk(2, 5, 1), mk(3, 150, 2, "Friendly"), mk(4, 152, 5), mk(5, 300, 4), { ...mk(6, "", 1), min_skill: "" }];
+  const out = selectM1(rows, { profession: "tailoring", count: 3 });
+  assert.deepEqual(out.map((r) => r.recipe_id), ["2", "4", "5"]);
+  assert.deepEqual(selectM1(rows, { profession: "Cooking" }), []);
+});
