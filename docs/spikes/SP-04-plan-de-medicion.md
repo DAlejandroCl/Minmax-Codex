@@ -115,3 +115,10 @@ Pantalla de Leatherworking, habilidad 148/225, objetivo 300: la ruta completa es
 - **Requisito de estación**: *Blue Dragonscale Leggings* se fabrica «at Sewing Machine». La API de recetas no trae ningún campo de ese tipo (nuevo hueco de R-18); hay que confirmar en el juego qué recetas lo exigen.
 - **Origen de reactivos**: SkillUp marca cada reactivo como `vendor` o `AH` (Fine/Silken/Rune Thread y Salt de vendedor; Black Dye y Heavy Leather de subasta). Con el catálogo de la API podemos comprobar los totales: Σ (crafteos × cantidad por receta) debe dar 126 Fine Thread, 232 Silken Thread, 173 Rune Thread, 85 Black Dye, 30 Salt y 705 Heavy Leather.
 - **Costes**: el coste total que muestra («Needs 2795 oro») usa precios de Auctionator del usuario, por lo que no son comparables con otra casa de subastas. La ruta más cara son los tramos 274–300 (≈ 2.500 oro de 2.795).
+
+### 9c. Validación del catálogo contra SkillUp (2026-11-20)
+`verify-route` calculó los reactivos de la ruta con las recetas de la API (crafteos de SkillUp × cantidad por receta, descontando los intermedios) y **coincidió exactamente en los 6 reactivos visibles** (Fine Thread 126, Salt 30, Silken Thread 232, Rune Thread 173, Black Dye 85, Heavy Leather 705; diferencia 0).
+
+- **Conclusión:** los ids de receta, los reactivos y sus cantidades del catálogo de la API son correctos para estas 9 recetas, y los crafteos por tramo de SkillUp son coherentes con ellos. Es evidencia fuerte para R-18 (reactivos) y un caso de prueba para `packages/optimizer`.
+- **No cubierto:** la ventana de SkillUp muestra solo los primeros 6 reactivos (hay más abajo). El catálogo añade Heavy Hide 10, Iron Buckle 40, Thick Leather 772, Rugged Leather 1.640, Green Dragonscale 1.020, Cured Rugged Hide 54 y Blue Dragonscale 360; falta una captura con el resto de la lista para comprobarlos.
+- **Sigue abierto:** los umbrales de color (M1) y las probabilidades (M2): esta validación confirma recetas y cantidades, no `p`.
