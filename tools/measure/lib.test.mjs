@@ -129,3 +129,24 @@ test("colorTransitions distingue recetas con el mismo nombre por recipe_id", () 
   ];
   assert.equal(colorTransitions(rows).length, 2);
 });
+
+test("buildDatasets excluye la categoría SoD y sus patrones exclusivos", () => {
+  const professions = [
+    { name: "Alchemy", tiers: [{ name: "T", categories: [
+      { name: "Elixirs", recipes: [{ id: 1, name: "Lesser Arcane Elixir" }] },
+      { name: "SEASON OF DISCOVERY", recipes: [{ id: 2, name: "Lesser Arcane Elixir" }, { id: 3, name: "Solo SoD" }] },
+    ] }] },
+  ];
+  const requirements = new Map([
+    [1, { minSkill: 120, patternItemId: 10, patternName: "Recipe: A" }],
+    [2, { minSkill: 190, patternItemId: 11, patternName: "Recipe: A SoD" }],
+    [3, { minSkill: 200, patternItemId: 10, patternName: "Recipe: A" }],
+  ]);
+  const patterns = [{ id: 10, name: "Recipe: A" }, { id: 11, name: "Recipe: A SoD" }];
+  const d = buildDatasets({ professions, recipes: new Map(), requirements, patterns });
+  assert.deepEqual(d.recipes.map((r) => r.recipe_id), [1]);
+  assert.deepEqual(d.excluded.map((r) => r.recipe_id).sort(), [2, 3]);
+  assert.deepEqual(d.vendors.map((v) => v.pattern), ["Recipe: A"]); // el patrón 11 era solo SoD
+  const all = buildDatasets({ professions, recipes: new Map(), requirements, patterns, excludeCategories: [] });
+  assert.equal(all.recipes.length, 3);
+});
