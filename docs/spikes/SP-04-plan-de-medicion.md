@@ -122,3 +122,20 @@ Pantalla de Leatherworking, habilidad 148/225, objetivo 300: la ruta completa es
 - **Conclusión:** los ids de receta, los reactivos y sus cantidades del catálogo de la API son correctos para estas 9 recetas, y los crafteos por tramo de SkillUp son coherentes con ellos. Es evidencia fuerte para R-18 (reactivos) y un caso de prueba para `packages/optimizer`.
 - **No cubierto:** la ventana de SkillUp muestra solo los primeros 6 reactivos (hay más abajo). El catálogo añade Heavy Hide 10, Iron Buckle 40, Thick Leather 772, Rugged Leather 1.640, Green Dragonscale 1.020, Cured Rugged Hide 54 y Blue Dragonscale 360; falta una captura con el resto de la lista para comprobarlos.
 - **Sigue abierto:** los umbrales de color (M1) y las probabilidades (M2): esta validación confirma recetas y cantidades, no `p`.
+
+### 9d. Lista de compras completa: 13 de 13 reactivos coinciden (2026-11-20)
+Con las capturas de la lista de compras de SkillUp (`reference/skillup-route-reagents-leatherworking-148.csv`), **los 13 reactivos de la ruta coinciden con el catálogo** que calculó `verify-route`: los 6 anteriores más Heavy Hide 10, Thick Leather 772, Iron Buckle 40, Rugged Leather 1.640, Cured Rugged Hide 54, Green Dragonscale 1.020 y Blue Dragonscale 360. Quedan validadas las recetas, cantidades y crafteos de la ruta completa 148→300.
+
+**Qué enseñan los precios** (Auctionator del usuario, total 2.780 oro):
+
+| Reactivo | Cantidad que falta | Coste | Parte del total |
+|----------|-------------------:|------:|----------------:|
+| Cured Rugged Hide | 54 | 2.025 oro (37,5 oro c/u) | 73 % |
+| Rugged Leather | 1.639 | 266 oro | 10 % |
+| Blue Dragonscale | 360 | 252 oro | 9 % |
+| Green Dragonscale | 1.020 | 81 oro 50 plata | 3 % |
+| Resto (9 reactivos) | — | ≈ 76 oro | 3 % |
+
+- **Oportunidad para el optimizador:** el 73 % del coste es comprar *Cured Rugged Hide* en la subasta. Existe una receta de entrenador «Cured Rugged Hide» (está entre las 543 sin patrón), así que habría que comprobar si fabricarla con materiales más baratos reduce el coste. Es justo lo que SkillUp no parece valorar (no hay precio de la materia prima en su lista) y lo que nuestra guía debe resolver con el precio de cada intermedio y con detección de precios atípicos (R-04).
+- **Origen de cada reactivo:** SkillUp separa «Vendor» (Fine/Silken/Rune Thread, Salt) de «Auction house» (el resto), y exporta una lista para Auctionator. Nuestra guía debería producir un listado equivalente.
+- **Casa de subastas:** los precios son de su reino y de su casa; los nuestros salen de la API por casa de subastas (SP-03), por lo que no serán idénticos.
