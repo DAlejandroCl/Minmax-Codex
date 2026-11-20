@@ -1,9 +1,17 @@
-# Reactivos totales de la ruta y su fuente según SkillUp (have / need), transcritos de las capturas del 2026-11-20.
-# Sirve para validar recetas × crafteos × reactivos contra el catálogo de la API.
-reagent,have,need,source
-Fine Thread,1,126,vendor
-Salt,0,30,vendor
-Silken Thread,0,232,vendor
-Rune Thread,0,173,vendor
-Black Dye,0,85,AH
-Heavy Leather,38,705,AH
+# Reactivos totales de la ruta de SkillUp (Forever) y su lista de compras, transcritos de las capturas del 2026-11-20 (Leatherworking 148 → 300).
+# need = total de la ruta; have = en bolsas del usuario; total_copper = coste mostrado de lo que falta (precios de Auctionator del usuario; 1g=10000, 1s=100, 1c=1).
+# Sirve para validar recetas × crafteos × reactivos contra el catálogo de la API (verify-route). Total mostrado «for priced items»: 2780 oro.
+reagent,have,need,source,total_copper
+Fine Thread,1,126,vendor,11300
+Salt,0,30,vendor,1400
+Silken Thread,0,232,vendor,104400
+Rune Thread,0,173,vendor,778500
+Black Dye,0,85,AH,76200
+Heavy Leather,40,705,AH,119700
+Heavy Hide,6,10,AH,4800
+Thick Leather,8,772,AH,453100
+Iron Buckle,0,40,AH,6600
+Rugged Leather,1,1640,AH,2660000
+Cured Rugged Hide,0,54,AH,20250000
+Green Dragonscale,0,1020,AH,815000
+Blue Dragonscale,0,360,AH,2520000
