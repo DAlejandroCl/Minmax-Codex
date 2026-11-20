@@ -106,3 +106,12 @@ El product owner transcribió la ruta que calcula SkillUp para Leatherworking 14
 **Qué no se puede deducir.** Cada tramo da una ecuación con dos incógnitas por receta (amarillo y gris). Ejemplo: *Wicked Leather Gauntlets* (requisito 235) da 85 crafteos en 240–274, que encajan con varias parejas (amarillo = req y gris = req + 45; o amarillo = req + 15 y gris = req + 40). Hace falta medir el color en el juego (M1) para fijarlos; la ruta sirve de contraste.
 
 **Lecturas útiles ya.** Barbaric Shoulders da 1,0 crafteos/punto en 155–165 (naranja en todo el tramo); *Barbaric Harness* cuesta 4 crafteos por el punto 196→197 (casi gris) y SkillUp cambia a *Nightscape Headband* en ese punto, lo que confirma que el optimizador cambia de receta cuando `p` cae.
+
+### 9b. Lo que muestran las capturas de SkillUp (2026-11-20)
+Pantalla de Leatherworking, habilidad 148/225, objetivo 300: la ruta completa está en `reference/skillup-route-steps-leatherworking-148.csv` y los reactivos en `reference/skillup-route-reagents-leatherworking-148.csv`.
+
+- **Rangos de profesión como pasos de la ruta.** SkillUp incluye «Train Artisan at 200» (5 oro) y los segmentos «Expert 150–225» y «Artisan 225–300». El optimizador necesita modelar el **entrenamiento de rango** (habilidad y, en el juego clásico, nivel de personaje mínimo; no verificado en Forever) como coste y requisito, no solo los crafteos (RN-04).
+- **Entrenar cada receta tiene coste** («Train Barbaric Shoulders», «Train Nightscape Pants»…) y los patrones comprables aparecen como paso («Buy Pattern: Wicked Leather Gauntlets», ≈ 1 oro 8 plata). Es el dato M3/M4 que buscamos; se puede verificar en el entrenador.
+- **Requisito de estación**: *Blue Dragonscale Leggings* se fabrica «at Sewing Machine». La API de recetas no trae ningún campo de ese tipo (nuevo hueco de R-18); hay que confirmar en el juego qué recetas lo exigen.
+- **Origen de reactivos**: SkillUp marca cada reactivo como `vendor` o `AH` (Fine/Silken/Rune Thread y Salt de vendedor; Black Dye y Heavy Leather de subasta). Con el catálogo de la API podemos comprobar los totales: Σ (crafteos × cantidad por receta) debe dar 126 Fine Thread, 232 Silken Thread, 173 Rune Thread, 85 Black Dye, 30 Salt y 705 Heavy Leather.
+- **Costes**: el coste total que muestra («Needs 2795 oro») usa precios de Auctionator del usuario, por lo que no son comparables con otra casa de subastas. La ruta más cara son los tramos 274–300 (≈ 2.500 oro de 2.795).
