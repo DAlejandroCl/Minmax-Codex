@@ -244,3 +244,32 @@ export function buildDatasets({ professions, recipes, requirements, patterns = [
       .sort((a, b) => a.pattern.localeCompare(b.pattern)),
   };
 }
+
+/**
+ * Elige recetas para M1 (umbrales de color) repartidas por todo el rango de habilidad mínima de una profesión.
+ * Divide el rango en `count` tramos y toma, por tramo, la receta con menos reactivos que no exija reputación.
+ * `rows`: filas de recipes.csv.
+ */
+export function selectM1(rows, { profession, count = 15 }) {
+  const pool = rows
+    .filter((r) => r.profession.toLowerCase() === profession.toLowerCase() && r.min_skill !== "")
+    .map((r) => ({ ...r, req: Number(r.min_skill), reagents: Number(r.reagent_count) || 0 }));
+  if (pool.length === 0) return [];
+  const lo = Math.min(...pool.map((r) => r.req));
+  const hi = Math.max(...pool.map((r) => r.req));
+  const width = (hi - lo + 1) / count;
+  const bins = new Map();
+  for (const r of pool) {
+    const bin = Math.min(count - 1, Math.floor((r.req - lo) / width));
+    const best = bins.get(bin);
+    const rank = (x) => [x.reputation !== "" ? 1 : 0, x.reagents, x.req];
+    const better = (a, b) => {
+      const ra = rank(a);
+      const rb = rank(b);
+      for (let i = 0; i < ra.length; i++) if (ra[i] !== rb[i]) return ra[i] < rb[i];
+      return false;
+    };
+    if (!best || better(r, best)) bins.set(bin, r);
+  }
+  return [...bins.entries()].sort((a, b) => a[0] - b[0]).map(([, r]) => r);
+}
