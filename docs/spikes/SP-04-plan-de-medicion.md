@@ -20,7 +20,8 @@ Con `recipes.csv` (2.493 recetas):
 - **65 de las 66 parejas de recetas con el mismo nombre** son una variante SoD y la clásica (p. ej. *Lesser Arcane Elixir*: id 50023 SoD, req 190, y id 54549, req 120). Por eso **los CSV de medición usan `recipe_id`** además del nombre: el nombre solo es ambiguo.
 - Las 696 recetas sin patrón se reparten así: 153 SoD y 543 clásicas (candidatas a entrenador, M3).
 - 180 recetas de Enchanting no tienen ítem fabricado (son encantamientos): es esperado, no un error.
-- El optimizador deberá decidir si incluye o no las recetas SoD (parámetro de ámbito) hasta confirmar en el juego cuáles están disponibles en Forever.
+- **Decisión del product owner (2026-11-20): el ámbito excluye las recetas de Season of Discovery**; solo se incluyen las clásicas y las nuevas exclusivas de Forever. `build-csv` las filtra por la categoría «SEASON OF DISCOVERY» y las guarda en `data/excluded.csv` para auditoría (`--include-sod` las recupera). Resultado esperado: 2.206 recetas (2.493 − 287), 543 sin patrón y 1.663 con habilidad mínima; 133 patrones solo-SoD salen de `vendors.csv`.
+- Límite del criterio: depende de que la API etiquete así a todas las recetas SoD. Si en el juego aparece una receta SoD fuera de esa categoría, se añade a la lista de exclusión (`EXCLUDED_CATEGORIES`) o por id.
 
 ## 2. Reglas de la medición
 - Solo observación manual en el juego y anotación propia: sin leer archivos del cliente ni usar datos de terceros.
