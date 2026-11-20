@@ -1,0 +1,23 @@
+# Pasos completos de la ruta de SkillUp (Forever) transcritos de las capturas del usuario el 2026-11-20 (Leatherworking 148/225, objetivo 300).
+# Valores CALCULADOS por el addon con precios de Auctionator del usuario: referencia de validación, no fuente de datos (SP-08, R-19).
+# cost_copper: monedas leídas como plata (s) para importes pequeños y oro (g) donde la captura muestra la moneda amarilla; 1g=10000, 1s=100. Revisar si hay duda.
+step,type,item,skill_from,skill_to,crafts,cost_copper,note
+1,craft,Hillman's Cloak,148,155,13,700,uses materials you have
+2,train,Barbaric Shoulders,,,,2500,
+3,material,Cured Heavy Hide,,,10,,makes 10 Cured Heavy Hide
+4,craft,Barbaric Shoulders,155,165,10,4000,uses materials you have
+5,train,Barbaric Harness,,,,2800,
+6,craft,Barbaric Harness,165,195,36,4500,
+7,train,Nightscape Headband,,,,3500,
+8,craft,Nightscape Headband,195,196,1,900,uses materials you have
+9,craft,Barbaric Harness,196,197,4,500,
+10,craft,Nightscape Headband,197,210,19,17900,uses materials you have
+11,train,Artisan rank (at skill 200),,,,50000,rango de profesión
+12,train,Nightscape Pants,,,,4600,
+13,craft,Nightscape Pants,210,240,48,66900,
+14,buy_pattern,Wicked Leather Gauntlets,,,,10800,patrón comprado
+15,craft,Wicked Leather Gauntlets,240,274,85,976200,uses materials you have
+16,train,Green Dragonscale Gauntlets,,,,30000,
+17,craft,Green Dragonscale Gauntlets,274,290,34,14540000,
+18,train,Blue Dragonscale Leggings,,,,50000,
+19,craft,Blue Dragonscale Leggings,290,300,10,10250000,at Sewing Machine (requiere estación)
