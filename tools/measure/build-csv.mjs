@@ -5,6 +5,8 @@
  *   pnpm --filter @minmax-codex/api-probe probe patterns -- --details # una vez (habilidad mínima de patrones)
  *   pnpm --filter @minmax-codex/measure build-csv
  *
+ * Excluye las recetas de la categoría «SEASON OF DISCOVERY» (ámbito: clásicas y nuevas de Forever) y las deja
+ * en data/excluded.csv para auditoría; `--include-sod` las incluye.
  * Escribe data/recipes.csv, crafts.csv, colors.csv, trainers.csv y vendors.csv. Rellena lo que da la API y
  * deja en blanco lo que hay que medir en el juego. No sobrescribe archivos con datos propios: usa --force.
  */
@@ -49,9 +51,12 @@ if (!hasPatterns) console.warn("Aviso: sin patrones (ejecuta `probe patterns -- 
 const requirements = new Map(hasPatterns ? read(reqFile).map((r) => [r.recipeId, r]) : []);
 const patterns = hasPatterns ? read(patFile) : [];
 
-const data = buildDatasets({ professions, recipes, requirements, patterns });
+const includeSod = process.argv.includes("--include-sod");
+const data = buildDatasets({ professions, recipes, requirements, patterns, ...(includeSod ? { excludeCategories: [] } : {}) });
+console.log(`Recetas excluidas (Season of Discovery): ${data.excluded.length}${includeSod ? " (desactivado con --include-sod)" : ""}`);
 const HEADERS = {
   recipes: Object.keys(data.recipes[0] ?? {}),
+  excluded: Object.keys(data.recipes[0] ?? {}),
   crafts: ["date", "profession", "recipe_id", "recipe", "skill_start", "color", "crafts", "skill_ups"],
   colors: ["date", "profession", "recipe_id", "recipe", "req_skill", "skill", "color"],
   trainers: ["date", "profession", "trainer", "zone", "recipe_id", "recipe", "req_skill", "cost_copper"],
@@ -61,7 +66,7 @@ const HEADERS = {
 await mkdir(DATA, { recursive: true });
 for (const [name, rows] of Object.entries(data)) {
   const file = join(DATA, `${name}.csv`);
-  if (existsSync(file) && !force && name !== "recipes") {
+  if (existsSync(file) && !force && !["recipes", "excluded"].includes(name)) {
     const measured = parseCsv(readFileSync(file, "utf8")).some((r) => Object.values(r).some((v) => v !== "") && (r.color || r.crafts || r.trainer || r.vendor || r.zone));
     if (measured) {
       console.log(`= ${name}.csv ya tiene datos medidos: se conserva (usa --force para regenerar)`);
