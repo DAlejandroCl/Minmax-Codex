@@ -25,7 +25,10 @@ for (const s of steps) {
   if (existsSync(file)) recipes.set(Number(s.recipe_id), JSON.parse(readFileSync(file, "utf8")));
 }
 const { needs, missing } = routeReagents(steps, recipes);
-if (missing.length) console.warn(`Recetas sin descargar: ${[...new Set(missing)].join(", ")}`);
+if (missing.length) {
+  const ids = [...new Set(missing)].map((m) => m || "(paso sin recipe_id)");
+  console.warn(`Recetas no encontradas en el catálogo: ${ids.join(", ")}`);
+}
 
 const lower = new Map([...needs].map(([k, v]) => [k.toLowerCase(), v]));
 console.log("reactivo         SkillUp  catálogo  dif.");
