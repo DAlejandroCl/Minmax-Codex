@@ -345,3 +345,18 @@ export function routeReagents(steps, recipes) {
   }
   return { needs, missing };
 }
+
+/** Busca recetas por id exacto o por nombre (sin distinguir mayúsculas; coincidencia exacta primero, luego parcial). */
+export function findRecipes(recipes, query) {
+  const q = String(query).trim().toLowerCase();
+  const list = [...recipes];
+  if (/^\d+$/.test(q)) return list.filter((r) => String(r.id) === q);
+  const exact = list.filter((r) => nameOf(r.name).toLowerCase() === q);
+  return exact.length ? exact : list.filter((r) => nameOf(r.name).toLowerCase().includes(q));
+}
+
+/** Recetas cuyo ítem fabricado se llama `itemName` (para expandir un reactivo que se puede fabricar). */
+export function recipesCrafting(recipes, itemName) {
+  const q = itemName.toLowerCase();
+  return [...recipes].filter((r) => nameOf(r.crafted_item?.name).toLowerCase() === q);
+}
