@@ -7,8 +7,9 @@
   "scripts": {
     "analyze": "node analyze.mjs",
     "build-csv": "node build-csv.mjs",
-    "lint": "eslint analyze.mjs build-csv.mjs lib.mjs lib.test.mjs",
-    "typecheck": "node --check analyze.mjs && node --check build-csv.mjs && node --check lib.mjs && node --check lib.test.mjs",
+    "select-m1": "node select-m1.mjs",
+    "lint": "eslint analyze.mjs build-csv.mjs select-m1.mjs lib.mjs lib.test.mjs",
+    "typecheck": "node --check analyze.mjs && node --check build-csv.mjs && node --check select-m1.mjs && node --check lib.mjs && node --check lib.test.mjs",
     "test": "node --test"
   }
 }
