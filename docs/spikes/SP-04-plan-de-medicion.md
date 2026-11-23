@@ -162,3 +162,5 @@ Precios observados por el usuario (`reference/prices-observed-2026-11-20.csv`): 
   1. Mostrar la **antigüedad** de cada precio y avisar cuando un precio se aparta mucho del resto (R-04).
   2. Calcular el coste de comprar N unidades recorriendo las ofertas (profundidad del mercado), no solo el precio mínimo: 54 unidades a 1,15 oro supone que existan 54 ofertas a ese precio. Esto no está medido; la API de subastas (SP-03) entrega todas las ofertas por casa y permite calcularlo.
   3. Comparar siempre **comprar vs fabricar** cada intermedio con precios vigentes y elegir el más barato.
+
+**Profundidad confirmada (2026-11-23):** el usuario verificó que hay **más de 100 unidades** de Cured Rugged Hide a ≈ 1 oro 15 plata, así que los 54 de la ruta se cubren a ese precio y el coste estimado de ≈ 817 oro es realista para su casa de subastas. Queda pendiente medir cómo sube el precio cuando se compran cantidades mayores (caso con menos oferta) con los datos de la API (SP-03).
