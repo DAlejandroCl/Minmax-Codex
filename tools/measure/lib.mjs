@@ -432,3 +432,69 @@ export function recipesCrafting(recipes, itemName) {
   const q = itemName.toLowerCase();
   return [...recipes].filter((r) => nameOf(r.crafted_item?.name).toLowerCase() === q);
 }
+
+const range = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
+
+/**
+ * Ajusta (amarillo, gris) de cada receta a los crafteos por tramo de una ruta, con una separación común
+ * `gris − amarillo` (la que minimiza el error total; entre empates, la más cercana a `preferGap`).
+ * ⚠ Es una inferencia a partir de valores *calculados* por SkillUp, no una medición: sirve para probar el
+ * optimizador de punta a punta hasta tener umbrales medidos (M1). Un tramo todo naranja no fija el amarillo:
+ * se toma el menor amarillo compatible (el último punto del tramo).
+ * `bySegments`: Map clave → [{ from, to, crafts }].
+ */
+export function fitThresholds(bySegments, { gaps = range(5, 60), preferGap = 20 } = {}) {
+  const score = (segments, yellow, grey) => {
+    let ceilErr = 0;
+    let contErr = 0;
+    for (const s of segments) {
+      const e = expectedCrafts(s.from, s.to, { yellow, grey });
+      if (!Number.isFinite(e)) return null;
+      ceilErr += Math.abs(Math.ceil(e - 1e-9) - s.crafts);
+      contErr += Math.abs(e - s.crafts);
+    }
+    return { ceilErr, contErr };
+  };
+  const fitOne = (segments, gap) => {
+    const lo = Math.min(...segments.map((s) => s.from)) - 80;
+    const hi = Math.max(...segments.map((s) => s.to)) + 5;
+    let best = null;
+    for (let yellow = lo; yellow <= hi; yellow++) {
+      const sc = score(segments, yellow, yellow + gap);
+      if (!sc) continue;
+      if (
+        !best ||
+        sc.ceilErr < best.ceilErr ||
+        (sc.ceilErr === best.ceilErr && sc.contErr < best.contErr - 1e-9)
+      ) {
+        best = { yellow, grey: yellow + gap, ...sc };
+      }
+    }
+    return best;
+  };
+  let chosen = null;
+  for (const gap of gaps) {
+    const fits = new Map();
+    let total = 0;
+    let ok = true;
+    for (const [key, segments] of bySegments) {
+      const fit = fitOne(segments, gap);
+      if (!fit) {
+        ok = false;
+        break;
+      }
+      fits.set(key, fit);
+      total += fit.ceilErr + fit.contErr * 0.01;
+    }
+    if (!ok) continue;
+    if (
+      !chosen ||
+      total < chosen.total - 1e-9 ||
+      (Math.abs(total - chosen.total) <= 1e-9 &&
+        Math.abs(gap - preferGap) < Math.abs(chosen.gap - preferGap))
+    ) {
+      chosen = { gap, fits, total };
+    }
+  }
+  return chosen;
+}
