@@ -40,8 +40,8 @@ function Inner({
   );
 
   return (
-    <main className="mx-auto flex max-w-5xl flex-col gap-6 p-4 text-slate-900">
-      <header className="flex flex-wrap items-center justify-between gap-2">
+    <main className="mx-auto flex w-full max-w-6xl min-w-0 flex-col gap-6 p-4 text-slate-900 sm:p-6">
+      <header className="flex flex-wrap items-start justify-between gap-3">
         <h1 className="text-2xl font-bold">{t("title")}</h1>
         <div role="group" aria-label="Idioma / Language" className="flex gap-1">
           {LOCALES.map((l) => (
@@ -61,9 +61,9 @@ function Inner({
       <p role="note" className="rounded border border-amber-700 bg-amber-50 p-3 text-amber-950">
         {t("demoNotice")}
       </p>
-      <div className="grid gap-8 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-start">
         <CalculatorForm locale={locale} />
-        <section aria-labelledby="result-heading" className="flex flex-col gap-6">
+        <section aria-labelledby="result-heading" className="flex min-w-0 flex-col gap-6">
           <h2 id="result-heading" className="text-xl font-semibold">
             {t("result.heading")}
           </h2>
