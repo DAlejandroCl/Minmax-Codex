@@ -21,7 +21,7 @@ export function MoneyInput({ label, value, onChange }: Props) {
   const silver = Math.floor((value % 10_000) / 100);
   const cop = value % 100;
   const field = (suffix: string, text: string, current: number, factor: number, max?: number) => (
-    <label className="flex items-center gap-1 text-sm" htmlFor={`${id}-${suffix}`}>
+    <label className="flex items-center gap-1 text-sm text-muted" htmlFor={`${id}-${suffix}`}>
       <input
         id={`${id}-${suffix}`}
         type="number"
@@ -29,7 +29,7 @@ export function MoneyInput({ label, value, onChange }: Props) {
         min={0}
         {...(max === undefined ? {} : { max })}
         aria-label={`${label} — ${text}`}
-        className="w-16 rounded border border-slate-500 bg-white px-2 py-1 text-slate-900"
+        className="field w-[4.25rem]"
         value={current}
         onChange={(e) => {
           const next = toInt(e.target.value) * factor;
