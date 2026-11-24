@@ -47,7 +47,14 @@ importers:
 
   tools/api-probe: {}
 
-  tools/measure: {}
+  tools/measure:
+    dependencies:
+      '@minmax-codex/optimizer':
+        specifier: workspace:*
+        version: link:../../packages/optimizer
+      '@minmax-codex/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
 
 packages:
 
