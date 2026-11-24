@@ -164,3 +164,27 @@ Precios observados por el usuario (`reference/prices-observed-2026-11-20.csv`): 
   3. Comparar siempre **comprar vs fabricar** cada intermedio con precios vigentes y elegir el más barato.
 
 **Profundidad confirmada (2026-11-23):** el usuario verificó que hay **más de 100 unidades** de Cured Rugged Hide a ≈ 1 oro 15 plata, así que los 54 de la ruta se cubren a ese precio y el coste estimado de ≈ 817 oro es realista para su casa de subastas. Queda pendiente medir cómo sube el precio cuando se compran cantidades mayores (caso con menos oferta) con los datos de la API (SP-03).
+
+### 9g. Primera ejecución real de `compare-route` (2026-11-23)
+Con el catálogo real (2.494 recetas; **una más que el 2026-11-19**: el catálogo de Forever sigue cambiando, R-03):
+
+**1) Ruta de SkillUp con nuestro modelo de costes**
+
+| | SkillUp | Nuestro modelo |
+|---|--------:|---------------:|
+| Materiales de la ruta (10 tramos) | 2.586 oro | **819 oro** |
+
+- La diferencia (≈ 1.767 oro) se explica casi toda por el **precio obsoleto del Cured Rugged Hide**: 54 unidades × (37,5 − 1,15) oro = **1.963 oro**. Los tramos que lo usan (Green y Blue Dragonscale) salen 1.192 y 695 oro más baratos con el precio actual.
+- En los tramos pequeños nuestro modelo sale **más caro** (≈ 121 oro en total, p. ej. Wicked Leather Gauntlets 156 oro frente a 98): SkillUp descuenta lo que el usuario ya tiene en bolsas («uses materials you have») y nosotros cobramos todos los reactivos. Es una diferencia de enfoque, no un error de datos; la guía debe permitir marcar «ya lo tengo».
+- Nuestro total (819 oro + recetas 10,4 + hito 5) ≈ **835 oro**, en línea con la estimación de § 9f (≈ 817 oro).
+
+**2) Optimizador con umbrales ajustados (separación amarillo→gris = 27, no medidos)**
+
+| | Crafteos | Coste |
+|---|---------:|------:|
+| SkillUp (ruta con nuestros precios) | 260 | ≈ 835 oro |
+| Optimizador | 265 | **831 oro** |
+
+- Mismas recetas en el mismo orden salvo que el optimizador no vuelve a Barbaric Harness en 196→197 (usa Headband de 195 a 213) y alarga Hillman's Cloak hasta 157. Diferencia de coste: ≈ 0,5 %.
+- Coste de recetas (10 oro 42 plata) = suma de los entrenamientos y el patrón de la ruta; hito Artisan 5 oro: coinciden con SkillUp.
+- **Lectura:** el pipeline completo (catálogo → precios → optimizador) funciona con datos reales y reproduce la ruta con una desviación pequeña. Como los umbrales salen de la propia ruta, esta coincidencia no valida los umbrales (M1) ni la habilidad de las recetas de entrenador (M3).
