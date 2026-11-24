@@ -13,63 +13,46 @@ export interface ItemInfo {
   readonly name: { readonly es: string; readonly en: string };
   readonly source: ItemSource;
   readonly defaultPrice: Copper;
+  /** Precio habitual, para detectar precios atípicos. */
+  readonly reference: Copper;
+  /** Antigüedad de la observación del precio de mercado, en días. Los vendedores no la tienen. */
+  readonly observedDaysAgo?: number;
 }
 
+const vendor = (id: ItemId, es: string, en: string, price: number): ItemInfo => ({
+  id,
+  name: { es, en },
+  source: "vendor",
+  defaultPrice: copper(price),
+  reference: copper(price),
+});
+const auction = (
+  id: ItemId,
+  es: string,
+  en: string,
+  price: number,
+  reference: number,
+  observedDaysAgo: number,
+): ItemInfo => ({
+  id,
+  name: { es, en },
+  source: "auction",
+  defaultPrice: copper(price),
+  reference: copper(reference),
+  observedDaysAgo,
+});
+
 export const DEMO_ITEMS: readonly ItemInfo[] = [
-  {
-    id: 1,
-    name: { es: "Hilo fino", en: "Fine thread" },
-    source: "vendor",
-    defaultPrice: copper(90),
-  },
-  {
-    id: 2,
-    name: { es: "Hilo de seda", en: "Silken thread" },
-    source: "vendor",
-    defaultPrice: copper(500),
-  },
-  {
-    id: 3,
-    name: { es: "Cuero pesado", en: "Heavy leather" },
-    source: "auction",
-    defaultPrice: copper(180),
-  },
-  {
-    id: 4,
-    name: { es: "Cuero grueso", en: "Thick leather" },
-    source: "auction",
-    defaultPrice: copper(600),
-  },
-  {
-    id: 5,
-    name: { es: "Tinte negro", en: "Black dye" },
-    source: "auction",
-    defaultPrice: copper(900),
-  },
-  {
-    id: 6,
-    name: { es: "Escama verde", en: "Green scale" },
-    source: "auction",
-    defaultPrice: copper(800),
-  },
-  {
-    id: 7,
-    name: { es: "Piel curada", en: "Cured hide" },
-    source: "auction",
-    defaultPrice: copper(11_500),
-  },
-  {
-    id: 8,
-    name: { es: "Piel cruda", en: "Raw hide" },
-    source: "auction",
-    defaultPrice: copper(500),
-  },
-  {
-    id: 9,
-    name: { es: "Sal refinada", en: "Refined salt" },
-    source: "auction",
-    defaultPrice: fromGsc(63),
-  },
+  vendor(1, "Hilo fino", "Fine thread", 90),
+  vendor(2, "Hilo de seda", "Silken thread", 500),
+  auction(3, "Cuero pesado", "Heavy leather", 180, 180, 1),
+  auction(4, "Cuero grueso", "Thick leather", 600, 600, 2),
+  auction(5, "Tinte negro", "Black dye", 900, 900, 3),
+  auction(6, "Escama verde", "Green scale", 800, 800, 1),
+  // Ejemplo de precio dudoso: viejo y muy por encima de lo habitual (como el de 37.5g que vimos en SkillUp).
+  auction(7, "Piel curada", "Cured hide", fromGsc(37, 50), 11_500, 30),
+  auction(8, "Piel cruda", "Raw hide", 500, 500, 2),
+  auction(9, "Sal refinada", "Refined salt", fromGsc(63), fromGsc(63), 4),
 ];
 
 const trainer = (cost: number): Recipe["acquisition"] => ({ kind: "trainer", cost: copper(cost) });
@@ -194,7 +177,7 @@ export const DEMO_RECIPES: readonly RecipeInfo[] = [
         { itemId: 9, quantity: 1 },
       ],
       craftedItemId: 7,
-      craftedQuantity: 2,
+      craftedQuantity: 1,
       acquisition: { kind: "known" },
     },
   ),
