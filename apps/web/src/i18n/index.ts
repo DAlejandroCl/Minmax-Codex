@@ -5,6 +5,21 @@ import type { Locale } from "../features/calculator/model";
 
 export const es = {
   loading: "Cargando…",
+  strategy: {
+    legend: "Estrategia",
+    cheapest: { name: "Más barata", hint: "Menor coste total. Puede incluir patrones de botín." },
+    "fewest-crafts": {
+      name: "Menos crafteos",
+      hint: "Los mínimos crafteos; a igualdad, la más barata.",
+    },
+    "no-bop": { name: "Sin patrones de botín", hint: "Solo patrones que puedes comprar." },
+    "vendor-only": { name: "Solo vendedor", hint: "Solo materiales que venden los PNJ." },
+    noRoute: "Sin ruta",
+    crafts_one: "{{count}} crafteo",
+    crafts_other: "{{count}} crafteos",
+    extraCost: "+{{percent}} % de coste",
+  },
+
   home: {
     pageTitle: "Minmax Codex",
     tagline:
@@ -53,7 +68,12 @@ export const es = {
     chanceEnd: "Al terminar",
     routeLabel: "Ruta de habilidad {{from}} a {{to}}",
     acquisition: "Cómo se obtiene: {{how}}",
-    how: { known: "ya conocida", trainer: "entrenador ({{cost}})", pattern: "patrón ({{cost}})" },
+    how: {
+      known: "ya conocida",
+      trainer: "entrenador ({{cost}})",
+      pattern: "patrón ({{cost}})",
+      patternBop: "patrón de botín (se liga al recogerlo)",
+    },
     milestone: "Hito: {{label}} ({{cost}})",
   },
   shopping: {
@@ -100,6 +120,9 @@ export const es = {
       bodyTrainer:
         "Sin comprar patrones no se llega a esa habilidad. Permite patrones para ver una ruta.",
       allowPatterns: "Permitir patrones",
+      bodyStrategy:
+        "Con la estrategia elegida no hay ruta. Prueba otra, por ejemplo la más barata.",
+      useCheapest: "Usar la más barata",
     },
     error: {
       title: "No se pudo calcular el plan",
@@ -118,6 +141,21 @@ export const es = {
 
 export const en: typeof es = {
   loading: "Loading…",
+  strategy: {
+    legend: "Strategy",
+    cheapest: { name: "Cheapest", hint: "Lowest total cost. May include bind-on-pickup patterns." },
+    "fewest-crafts": {
+      name: "Fewest crafts",
+      hint: "The fewest crafts; ties go to the cheaper plan.",
+    },
+    "no-bop": { name: "No bind-on-pickup patterns", hint: "Only patterns you can buy." },
+    "vendor-only": { name: "Vendor only", hint: "Only materials sold by NPCs." },
+    noRoute: "No route",
+    crafts_one: "{{count}} craft",
+    crafts_other: "{{count}} crafts",
+    extraCost: "+{{percent}} % cost",
+  },
+
   home: {
     pageTitle: "Minmax Codex",
     tagline:
@@ -166,7 +204,12 @@ export const en: typeof es = {
     chanceEnd: "At end",
     routeLabel: "Skill route {{from}} to {{to}}",
     acquisition: "How to get it: {{how}}",
-    how: { known: "already known", trainer: "trainer ({{cost}})", pattern: "pattern ({{cost}})" },
+    how: {
+      known: "already known",
+      trainer: "trainer ({{cost}})",
+      pattern: "pattern ({{cost}})",
+      patternBop: "bind-on-pickup pattern",
+    },
     milestone: "Milestone: {{label}} ({{cost}})",
   },
   shopping: {
@@ -213,6 +256,8 @@ export const en: typeof es = {
       bodyTrainer:
         "Without buying patterns that skill cannot be reached. Allow patterns to see a route.",
       allowPatterns: "Allow patterns",
+      bodyStrategy: "The chosen strategy has no route. Try another one, such as the cheapest.",
+      useCheapest: "Use the cheapest",
     },
     error: {
       title: "The plan could not be calculated",
