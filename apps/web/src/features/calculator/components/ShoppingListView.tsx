@@ -1,11 +1,17 @@
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useToasts } from "../../toast/store";
 import { buildShoppingText, money } from "../format";
 import type { ShoppingList } from "../model";
 
-export function ShoppingListView({ list }: { readonly list: ShoppingList }) {
+export function ShoppingListView({
+  list,
+  flagged,
+}: {
+  readonly list: ShoppingList;
+  readonly flagged: ReadonlySet<number>;
+}) {
   const { t } = useTranslation();
-  const [message, setMessage] = useState("");
+  const push = useToasts((state) => state.push);
 
   const copy = async (): Promise<void> => {
     const text = buildShoppingText(list, {
@@ -15,9 +21,9 @@ export function ShoppingListView({ list }: { readonly list: ShoppingList }) {
     });
     try {
       await navigator.clipboard.writeText(text);
-      setMessage(t("shopping.copied"));
+      push("success", t("shopping.copied"));
     } catch {
-      setMessage(t("shopping.copyFailed"));
+      push("error", t("shopping.copyFailed"));
     }
   };
 
@@ -31,11 +37,8 @@ export function ShoppingListView({ list }: { readonly list: ShoppingList }) {
           {t("shopping.copy")}
         </button>
       </div>
-      <p role="status" aria-live="polite" className="min-h-6 text-sm text-muted">
-        {message}
-      </p>
-      {list.rows.length === 0 ? (
-        <p>{t("shopping.empty")}</p>
+      {list.rows.every((r) => r.missing === 0) ? (
+        <p className="text-sm text-muted">{t("shopping.allOwned")}</p>
       ) : (
         <div
           className="overflow-x-auto"
@@ -75,6 +78,12 @@ export function ShoppingListView({ list }: { readonly list: ShoppingList }) {
                 <tr key={r.itemId} className="border-b border-line">
                   <th scope="row" className="py-1 pr-3 font-normal">
                     {r.name}
+                    {flagged.has(r.itemId) && (
+                      <span className="ml-2 text-diff-yellow" title={t("shopping.flagged")}>
+                        <span aria-hidden="true">⚠</span>
+                        <span className="sr-only">{t("shopping.flagged")}</span>
+                      </span>
+                    )}
                   </th>
                   <td
                     className={`py-1 pr-3 ${r.source === "auction" ? "text-q-rare" : "text-q-common"}`}
