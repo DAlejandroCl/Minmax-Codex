@@ -10,6 +10,4 @@ coverage/
 tools/**/out/
 .DS_Store
 
-# Astro
-.astro/
 apps/web/dist/
