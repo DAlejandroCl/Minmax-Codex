@@ -34,7 +34,12 @@ export function PlanSteps({ plan, locale }: { readonly plan: Plan; readonly loca
           const how =
             acq === undefined
               ? ""
-              : t(`result.how.${acq.kind}`, { cost: acq.kind === "known" ? "" : money(acq.cost) });
+              : t(
+                  `result.how.${acq.kind === "pattern" && acq.bindsOnPickup ? "patternBop" : acq.kind}`,
+                  {
+                    cost: acq.kind === "known" ? "" : money(acq.cost),
+                  },
+                );
           return (
             <li
               key={`${step.recipeId}-${i}`}
