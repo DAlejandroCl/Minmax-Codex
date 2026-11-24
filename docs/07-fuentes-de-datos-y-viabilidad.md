@@ -55,7 +55,7 @@
 | SP-3 | ¿Cuál es la fuente primaria de precios? | Informe de opciones + recheck del namespace Battle.net | Decisión documentada con fuente y frecuencia de actualización |
 | SP-4 | ¿Cómo se calcula el skill-up por color en Forever? | Función `p(s,r)` y su validación | Error < umbral acordado frente a muestreo in-game o guías |
 | SP-5 | ¿El optimizador iguala/mejora guías publicadas? | Prototipo `planProfession` para 2 profesiones | Costo ≤ guía de referencia en ≥ 80 % de casos |
-| SP-6 | ¿Astro + islas o SPA? | Prototipo de 1 página de entidad + calculadora | LCP, SEO y complejidad medidos |
+| SP-6 | ¿Astro + islas o SPA? | Prototipo de 1 página de entidad + calculadora | **Cerrado por decisión (ADR-014: SPA)**; LCP y SEO sin medir, se medirán antes del wiki público |
 | SP-7 | Legal: términos de Blizzard, uso de datos/iconos/marcas, política de contenido de fans | Checklist de cumplimiento | Aprobado antes de publicar |
 
 ## 5. Vigilancia continua
