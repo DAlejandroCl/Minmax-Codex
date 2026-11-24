@@ -1,3 +1,4 @@
+import type { Strategy } from "@minmax-codex/optimizer";
 import { create } from "zustand";
 import { DEMO_ITEMS, SKILL_MAX, SKILL_MIN } from "./demo-data";
 import { defaultPrices } from "./model";
@@ -10,6 +11,7 @@ interface Actions {
   setStartSkill(value: number): void;
   setTargetSkill(value: number): void;
   setTrainerOnly(value: boolean): void;
+  setStrategy(value: Strategy): void;
   setPrice(itemId: number, copper: number): void;
   /** Vuelve al precio observado de origen, con su antigüedad. */
   restorePrice(itemId: number): void;
@@ -18,6 +20,8 @@ interface Actions {
 }
 
 interface State extends CalculatorInputs {
+  /** Estrategia elegida: solo selecciona qué plan se muestra; todos se calculan siempre. */
+  readonly strategy: Strategy;
   /** Edad y origen de cada precio (no influye en el cálculo, solo en los avisos). */
   readonly priceMeta: Readonly<Record<number, PriceMeta>>;
 }
@@ -46,9 +50,11 @@ const nonNegativeInt = (value: number): number =>
 export const useCalculator = create<State & Actions>()((set) => ({
   ...initialInputs(),
   priceMeta: initialMeta(),
+  strategy: "cheapest",
   setStartSkill: (value) => set({ startSkill: clampSkill(value) }),
   setTargetSkill: (value) => set({ targetSkill: clampSkill(value) }),
   setTrainerOnly: (value) => set({ trainerOnly: value }),
+  setStrategy: (value) => set({ strategy: value }),
   setPrice: (itemId, copper) =>
     set((s) => ({
       prices: { ...s.prices, [itemId]: nonNegativeInt(copper) },
@@ -65,5 +71,5 @@ export const useCalculator = create<State & Actions>()((set) => ({
     }),
   setOwned: (itemId, quantity) =>
     set((s) => ({ owned: { ...s.owned, [itemId]: nonNegativeInt(quantity) } })),
-  reset: () => set({ ...initialInputs(), priceMeta: initialMeta() }),
+  reset: () => set({ ...initialInputs(), priceMeta: initialMeta(), strategy: "cheapest" }),
 }));
