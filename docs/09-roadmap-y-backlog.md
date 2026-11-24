@@ -58,7 +58,7 @@ Tamaño: S (≤ 1 día), M (2–3 días), L (≈ 1 semana).
 | H-004 | Como dev, quiero ejecutar **SP-2** (formato de exportación y parser) | L | Archivo real parseado y validado con Zod |
 | H-005 | Como dev, quiero decidir la fuente de precios (**SP-3**) | M | Decisión documentada en ADR |
 | H-006 | Como dev, quiero validar el modelo de skill-up (**SP-4**) | M | `p(s,r)` documentada con evidencia |
-| H-007 | Como dev, quiero comparar Astro+islas vs SPA (**SP-6**) | M | Tabla de LCP/SEO/complejidad y ADR-004 cerrado |
+| H-007 | Como dev, quiero comparar Astro+islas vs SPA (**SP-6**) | M | Tabla de LCP/SEO/complejidad y ADR-004 cerrado. **Estado: cerrado por decisión (ADR-014, SPA); sin comparativa medida** |
 | H-008 | Como dev, quiero checklist legal (**SP-7**) | S | Documento aprobado |
 
 ### MVP (primeros sprints)
