@@ -2,7 +2,7 @@ import i18next from "i18next";
 import type { i18n as I18nInstance } from "i18next";
 import type { Locale } from "../features/calculator/model";
 
-const es = {
+export const es = {
   title: "Calculadora de subida de profesión",
   demoNotice:
     "Datos de ejemplo: las recetas, precios y umbrales de color no son oficiales ni están medidos. Edita los precios para probar.",
@@ -57,10 +57,50 @@ const es = {
     auction: "Subasta",
     empty: "No hay nada que comprar.",
     tableRegion: "Tabla de la lista de compras (desplazable)",
+    allOwned: "Ya tienes todo lo necesario: no hay nada que comprar.",
+    flagged: "Precio por revisar",
+  },
+  skip: { main: "Saltar al contenido", plan: "Saltar al plan" },
+  price: {
+    observed_one: "Visto hace {{count}} día",
+    observed_other: "Visto hace {{count}} días",
+    stale: "Obsoleto",
+    outlier: "Atípico: {{factor}}× lo habitual",
+    manual: "Manual",
+    restore: "Restaurar",
+    reviewInPlan_one: "{{count}} precio del plan necesita revisión: {{names}}.",
+    reviewInPlan_other: "{{count}} precios del plan necesitan revisión: {{names}}.",
+    reviewHint:
+      "Un precio obsoleto o atípico puede inflar mucho el coste. Compruébalo en la subasta y edítalo.",
+  },
+  state: {
+    invalid: {
+      title: "Revisa el rango de habilidad",
+      body: "Corrige los valores del formulario para calcular el plan.",
+    },
+    none: {
+      title: "No hay ruta posible",
+      body: "Con las recetas disponibles no se llega a esa habilidad.",
+      bodyTrainer:
+        "Sin comprar patrones no se llega a esa habilidad. Permite patrones para ver una ruta.",
+      allowPatterns: "Permitir patrones",
+    },
+    error: {
+      title: "No se pudo calcular el plan",
+      body: "Ocurrió un error al calcular. Puedes reintentar.",
+      retry: "Reintentar",
+    },
+    ready: "Plan actualizado. Coste total: {{cost}}.",
+  },
+  toast: {
+    region: "Notificaciones",
+    dismiss: "Cerrar notificación",
+    reset: "Valores restablecidos.",
+    restored: "Precio de {{item}} restaurado.",
   },
 };
 
-const en: typeof es = {
+export const en: typeof es = {
   title: "Profession leveling calculator",
   demoNotice:
     "Sample data: recipes, prices and color thresholds are neither official nor measured. Edit the prices to try it.",
@@ -115,6 +155,46 @@ const en: typeof es = {
     auction: "Auction",
     empty: "Nothing to buy.",
     tableRegion: "Shopping list table (scrollable)",
+    allOwned: "You already have everything: nothing to buy.",
+    flagged: "Price to review",
+  },
+  skip: { main: "Skip to content", plan: "Skip to plan" },
+  price: {
+    observed_one: "Seen {{count}} day ago",
+    observed_other: "Seen {{count}} days ago",
+    stale: "Stale",
+    outlier: "Unusual: {{factor}}× the usual",
+    manual: "Manual",
+    restore: "Restore",
+    reviewInPlan_one: "{{count}} price in the plan needs review: {{names}}.",
+    reviewInPlan_other: "{{count}} prices in the plan need review: {{names}}.",
+    reviewHint:
+      "A stale or unusual price can inflate the cost a lot. Check it on the auction house and edit it.",
+  },
+  state: {
+    invalid: {
+      title: "Check the skill range",
+      body: "Fix the form values to calculate the plan.",
+    },
+    none: {
+      title: "No route available",
+      body: "The available recipes cannot reach that skill.",
+      bodyTrainer:
+        "Without buying patterns that skill cannot be reached. Allow patterns to see a route.",
+      allowPatterns: "Allow patterns",
+    },
+    error: {
+      title: "The plan could not be calculated",
+      body: "An error occurred while calculating. You can try again.",
+      retry: "Try again",
+    },
+    ready: "Plan updated. Total cost: {{cost}}.",
+  },
+  toast: {
+    region: "Notifications",
+    dismiss: "Dismiss notification",
+    reset: "Values reset.",
+    restored: "{{item}} price restored.",
   },
 };
 
