@@ -1,12 +1,13 @@
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
-import { DEMO_ITEMS, SKILL_MAX, SKILL_MIN } from "../demo-data";
+import { DEMO_ITEMS } from "../demo-data";
 import { validateInputs } from "../model";
 import type { Locale } from "../model";
 import { useCalculator } from "../store";
 import { useToasts } from "../../toast/store";
 import { MoneyInput } from "./MoneyInput";
 import { PriceNotes } from "./PriceNotes";
+import { SkillInput } from "./SkillInput";
 
 export function CalculatorForm({ locale, now }: { readonly locale: Locale; readonly now: number }) {
   const { t } = useTranslation();
@@ -16,23 +17,14 @@ export function CalculatorForm({ locale, now }: { readonly locale: Locale; reado
   const error = validateInputs(s);
   const errorId = `${id}-error`;
   const numberField = (key: "start" | "target", value: number, set: (v: number) => void) => (
-    <div className="flex flex-col gap-1">
-      <label htmlFor={`${id}-${key}`} className="font-medium text-muted">
-        {t(`form.${key}`)}
-      </label>
-      <input
-        id={`${id}-${key}`}
-        type="number"
-        inputMode="numeric"
-        min={SKILL_MIN}
-        max={SKILL_MAX}
-        value={value}
-        aria-invalid={error !== null}
-        {...(error === null ? {} : { "aria-describedby": errorId })}
-        className="field w-28"
-        onChange={(e) => set(e.target.valueAsNumber)}
-      />
-    </div>
+    <SkillInput
+      id={`${id}-${key}`}
+      label={t(`form.${key}`)}
+      value={value}
+      onCommit={set}
+      invalid={error !== null}
+      {...(error === null ? {} : { describedBy: errorId })}
+    />
   );
   return (
     <form className="flex min-w-0 flex-col gap-6" onSubmit={(e) => e.preventDefault()} noValidate>
