@@ -71,10 +71,10 @@ Tamaño: S (≤ 1 día), M (2–3 días), L (≈ 1 semana).
 | H-014 | `planProfession` con DAG de segmentos y costo fijo de patterns | L | Property tests + equivalencia con fuerza bruta |
 | H-015 | Estrategias (más barata, menos crafteos, sin BoP, solo vendor) | M | Cada una produce resultados distintos en casos de prueba |
 | H-016 | UI calculadora: formulario, resultado por pasos, lista de compras copiable | L | Accesible (axe sin violaciones críticas), responsive. **Estado: prototipo hecho** (`apps/web`, `/calculadora`; datos de ejemplo, Worker, ES/EN, axe en CI). Pendiente: datos reales (H-011/H-012), revisión responsive en dispositivo, E2E (H-021) |
-| H-017 | Modelo y UI de precios con edad, obsoleto y override | M | Precio > umbral se marca; override recalcula la ruta |
+| H-017 | Modelo y UI de precios con edad, obsoleto y override | M | Precio > umbral se marca; override recalcula la ruta **Estado: hecho en el prototipo** (`prices.ts`: obsoleto > 7 días solo en mercado, atípico > 3× lo habitual; override manual con restaurar; aviso en plan y lista de compras; edad y umbrales pendientes de calibrar con datos reales de la API) |
 | H-018 | Fichas de ítem/receta con tooltips y fuentes de obtención | M | Enlaces cruzados; URLs canónicas |
 | H-019 | Búsqueda global ⌘/Ctrl+K | M | Resultados agrupados por tipo; navegable con teclado |
-| H-020 | i18n ES/EN completo y detección de claves faltantes en CI | S | CI falla si falta una clave |
+| H-020 | i18n ES/EN completo y detección de claves faltantes en CI | S | CI falla si falta una clave Parcial: test de paridad de claves ES/EN en `apps/web` (corre en CI); falta cubrir el resto de la app |
 | H-021 | E2E Playwright del flujo CU-09 + Lighthouse CI | M | Flujo feliz y alterno A1 cubiertos |
 
 ### R2 (adelanto)
