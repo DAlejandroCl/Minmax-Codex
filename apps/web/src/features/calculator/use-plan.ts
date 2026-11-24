@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Plan } from "@minmax-codex/optimizer";
 import { buildPlanInput, computePlan, validateInputs } from "./model";
 import type { CalculatorInputs } from "./model";
@@ -12,12 +12,16 @@ export type PlanState =
 
 /**
  * Calcula el plan cada vez que cambian las entradas. Usa un Web Worker cuando existe (ADR-003)
- * y cae al cálculo síncrono si no (pruebas, navegadores sin soporte).
+ * y cae al cálculo síncrono si no (pruebas, navegadores sin soporte). Devuelve también `retry`,
+ * que vuelve a calcular con las mismas entradas tras un error.
  */
-export function usePlan(inputs: CalculatorInputs): PlanState {
+export function usePlan(inputs: CalculatorInputs): readonly [PlanState, () => void] {
   const [state, setState] = useState<PlanState>({ status: "computing" });
+  const [attempt, setAttempt] = useState(0);
   const worker = useRef<Worker | null>(null);
   const counter = useRef(0);
+
+  const retry = useCallback(() => setAttempt((n) => n + 1), []);
 
   useEffect(
     () => () => {
@@ -56,10 +60,20 @@ export function usePlan(inputs: CalculatorInputs): PlanState {
           : { status: "ready", plan: event.data.plan },
       );
     };
+    // Si el Worker no carga o revienta, se descarta para que el reintento cree uno nuevo.
+    const onFailure = (): void => {
+      current.terminate();
+      if (worker.current === current) worker.current = null;
+      setState({ status: "error", message: "worker" });
+    };
     current.addEventListener("message", onMessage);
+    current.addEventListener("error", onFailure);
     current.postMessage({ id, input: buildPlanInput(inputs) });
-    return () => current.removeEventListener("message", onMessage);
-  }, [inputs]);
+    return () => {
+      current.removeEventListener("message", onMessage);
+      current.removeEventListener("error", onFailure);
+    };
+  }, [inputs, attempt]);
 
-  return state;
+  return [state, retry];
 }
