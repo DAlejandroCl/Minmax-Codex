@@ -24,18 +24,14 @@ export function ShoppingListView({ list }: { readonly list: ShoppingList }) {
   return (
     <section aria-labelledby="shopping-heading" className="flex min-w-0 flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 id="shopping-heading" className="text-lg font-semibold">
+        <h3 id="shopping-heading" className="text-xl font-bold">
           {t("shopping.heading")}
         </h3>
-        <button
-          type="button"
-          onClick={() => void copy()}
-          className="rounded bg-slate-800 px-3 py-1.5 text-white hover:bg-slate-700"
-        >
+        <button type="button" onClick={() => void copy()} className="btn btn-primary">
           {t("shopping.copy")}
         </button>
       </div>
-      <p role="status" aria-live="polite" className="min-h-6 text-sm">
+      <p role="status" aria-live="polite" className="min-h-6 text-sm text-muted">
         {message}
       </p>
       {list.rows.length === 0 ? (
@@ -50,7 +46,7 @@ export function ShoppingListView({ list }: { readonly list: ShoppingList }) {
           <table className="w-full min-w-[34rem] border-collapse text-left text-sm [overflow-wrap:normal]">
             <caption className="sr-only">{t("shopping.heading")}</caption>
             <thead>
-              <tr className="border-b border-slate-500">
+              <tr className="border-b border-line-strong text-muted">
                 <th scope="col" className="py-1 pr-3">
                   {t("shopping.item")}
                 </th>
@@ -76,15 +72,19 @@ export function ShoppingListView({ list }: { readonly list: ShoppingList }) {
             </thead>
             <tbody>
               {list.rows.map((r) => (
-                <tr key={r.itemId} className="border-b border-slate-300">
+                <tr key={r.itemId} className="border-b border-line">
                   <th scope="row" className="py-1 pr-3 font-normal">
                     {r.name}
                   </th>
-                  <td className="py-1 pr-3">{t(`shopping.${r.source}`)}</td>
+                  <td
+                    className={`py-1 pr-3 ${r.source === "auction" ? "text-q-rare" : "text-q-common"}`}
+                  >
+                    {t(`shopping.${r.source}`)}
+                  </td>
                   <td className="py-1 pr-3 text-right">{r.needed}</td>
                   <td className="py-1 pr-3 text-right">{r.owned}</td>
                   <td className="py-1 pr-3 text-right">{r.missing}</td>
-                  <td className="py-1 pr-3 text-right">{money(r.unitPrice)}</td>
+                  <td className="py-1 pr-3 text-right tabular-nums">{money(r.unitPrice)}</td>
                   <td className="py-1 text-right">{money(r.subtotal)}</td>
                 </tr>
               ))}
@@ -94,7 +94,7 @@ export function ShoppingListView({ list }: { readonly list: ShoppingList }) {
                 <th scope="row" colSpan={6} className="py-2 text-right">
                   {t("shopping.total")}
                 </th>
-                <td className="py-2 text-right font-semibold">{money(list.total)}</td>
+                <td className="py-2 text-right font-bold text-gold">{money(list.total)}</td>
               </tr>
             </tfoot>
           </table>
