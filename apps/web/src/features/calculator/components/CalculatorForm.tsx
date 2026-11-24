@@ -4,12 +4,15 @@ import { DEMO_ITEMS, SKILL_MAX, SKILL_MIN } from "../demo-data";
 import { validateInputs } from "../model";
 import type { Locale } from "../model";
 import { useCalculator } from "../store";
+import { useToasts } from "../../toast/store";
 import { MoneyInput } from "./MoneyInput";
+import { PriceNotes } from "./PriceNotes";
 
-export function CalculatorForm({ locale }: { readonly locale: Locale }) {
+export function CalculatorForm({ locale, now }: { readonly locale: Locale; readonly now: number }) {
   const { t } = useTranslation();
   const id = useId();
   const s = useCalculator();
+  const push = useToasts((state) => state.push);
   const error = validateInputs(s);
   const errorId = `${id}-error`;
   const numberField = (key: "start" | "target", value: number, set: (v: number) => void) => (
@@ -58,6 +61,17 @@ export function CalculatorForm({ locale }: { readonly locale: Locale }) {
           {DEMO_ITEMS.map((item) => (
             <li key={item.id} className="panel flex flex-col gap-2 p-3">
               <span className="font-medium">{item.name[locale]}</span>
+              <PriceNotes
+                item={item}
+                price={s.prices[item.id] ?? 0}
+                meta={s.priceMeta[item.id]}
+                now={now}
+                locale={locale}
+                onRestore={() => {
+                  s.restorePrice(item.id);
+                  push("info", t("toast.restored", { item: item.name[locale] }));
+                }}
+              />
               <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
                 <MoneyInput
                   label={`${item.name[locale]} · ${t("form.prices")}`}
@@ -81,7 +95,14 @@ export function CalculatorForm({ locale }: { readonly locale: Locale }) {
           ))}
         </ul>
       </fieldset>
-      <button type="button" onClick={s.reset} className="btn self-start">
+      <button
+        type="button"
+        onClick={() => {
+          s.reset();
+          push("info", t("toast.reset"));
+        }}
+        className="btn self-start"
+      >
         {t("form.reset")}
       </button>
     </form>
