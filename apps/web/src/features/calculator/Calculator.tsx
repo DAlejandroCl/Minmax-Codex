@@ -40,9 +40,9 @@ function Inner({
   );
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl min-w-0 flex-col gap-6 p-4 text-slate-900 sm:p-6">
+    <main className="mx-auto flex w-full max-w-6xl min-w-0 flex-col gap-6 p-4 sm:p-6">
       <header className="flex flex-wrap items-start justify-between gap-3">
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
+        <h1 className="text-3xl font-bold text-gold">{t("title")}</h1>
         <div role="group" aria-label="Idioma / Language" className="flex gap-1">
           {LOCALES.map((l) => (
             <button
@@ -51,20 +51,23 @@ function Inner({
               lang={l}
               aria-pressed={l === locale}
               onClick={() => setLocale(l)}
-              className="rounded border border-slate-600 px-2 py-1 aria-pressed:bg-slate-800 aria-pressed:text-white"
+              className="btn px-2.5 py-1 aria-pressed:border-gold aria-pressed:bg-gold aria-pressed:text-gold-ink"
             >
               {l.toUpperCase()}
             </button>
           ))}
         </div>
       </header>
-      <p role="note" className="rounded border border-amber-700 bg-amber-50 p-3 text-amber-950">
+      <p role="note" className="panel border-l-4 border-l-diff-orange p-3 text-sm">
         {t("demoNotice")}
       </p>
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-start">
         <CalculatorForm locale={locale} />
-        <section aria-labelledby="result-heading" className="flex min-w-0 flex-col gap-6">
-          <h2 id="result-heading" className="text-xl font-semibold">
+        <section
+          aria-labelledby="result-heading"
+          className="panel flex min-w-0 flex-col gap-6 p-4 lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto"
+        >
+          <h2 id="result-heading" className="text-2xl font-bold">
             {t("result.heading")}
           </h2>
           <div role="status" aria-live="polite">
@@ -72,8 +75,11 @@ function Inner({
             {state.status === "error" && t("result.error")}
             {state.status === "ready" && state.plan === null && t("result.none")}
             {state.status === "ready" && state.plan && (
-              <p className="text-lg">
-                {t("result.total")}: <strong>{money(state.plan.totalCost)}</strong>
+              <p className="flex flex-col">
+                <span className="text-sm text-muted">{t("result.total")}</span>
+                <strong className="text-3xl tabular-nums text-gold [font-family:var(--font-display)]">
+                  {money(state.plan.totalCost)}
+                </strong>
               </p>
             )}
           </div>
