@@ -31,7 +31,7 @@ flowchart LR
 ```mermaid
 flowchart TB
   subgraph Cliente
-    WEB[apps/web<br/>Astro + React islands<br/>TanStack Query · Zustand · i18next · Tailwind v4]
+    WEB[apps/web<br/>React 19 SPA (Vite + React Router)<br/>TanStack Query · Zustand · i18next · Tailwind v4]
     WK[Web Worker<br/>optimizer + parser Lua]
   end
   subgraph Servidor
@@ -58,7 +58,7 @@ flowchart TB
 ```
 minmax-codex/
 ├─ apps/
-│  ├─ web/            # Astro + React 19 (islas), Tailwind v4, i18next
+│  ├─ web/            # React 19 SPA (Vite + React Router), Tailwind v4, i18next
 │  ├─ api/            # Express 5 + Zod + capa de datos
 │  ├─ jobs/           # ETL, agregación de precios, generación de estáticos
 │  └─ addon/          # Exportador Lua mínimo (WoW Forever)
@@ -79,9 +79,9 @@ minmax-codex/
 |------|----------|---------------|
 | Lenguaje | **TypeScript estricto** en todo el repo | Tipos compartidos front/back/ETL; stack dominado |
 | UI | **React 19** (componentes orientados a componentes), Tailwind v4 con tokens | Dominio del autor; sistema de diseño reutilizable |
-| Contenido público | **Astro** (SSG) con islas React | SEO de miles de páginas + interactividad donde importa (ADR-004) |
+| Aplicación web | **React 19 SPA** (Vite), rutas con `React.lazy` | Dominio del autor y un solo modelo de ruteo; prerender diferido hasta el wiki público (ADR-014) |
 | Estado servidor | **TanStack Query** | Caché, reintentos, invalidación |
-| Ruteo app interactiva | **TanStack Router** | Ya usado en el portafolio; rutas tipadas |
+| Ruteo | **React Router** | Estándar de mercado en React (ADR-014; sustituye a TanStack Router) |
 | Estado cliente | **Zustand** | Parámetros de calculadora, preferencias |
 | i18n | **i18next** | ES/EN; ya usado |
 | API | **Node 22 + Express 5** | Stack del autor |
@@ -153,7 +153,7 @@ Logs estructurados con `requestId`; métricas de ETL (filas, rechazos, duración
 | ADR-001 | Monorepo pnpm + Turborepo | **Aceptada** |
 | ADR-002 | Conectar personajes por **exportación de addon + importación de archivo**; integración oficial condicionada | **Aceptada** |
 | ADR-003 | `optimizer` como paquete puro compartido; ejecución en Web Worker | **Aceptada** |
-| ADR-004 | Astro (SSG) + islas React para contenido público; app interactiva en React | **Aceptada — condicionada a SP-6** |
+| ADR-004 | Astro (SSG) + islas React para contenido público; app interactiva en React | **Reemplazada por ADR-014** |
 | ADR-005 | Datos de juego versionados por build y servidos como artefactos estáticos | **Aceptada** |
 | ADR-006 | Dinero como entero en cobre | **Aceptada** (RN-02) |
 | ADR-007 | Acceso a datos: **Drizzle ORM** | **Aceptada** |
@@ -163,6 +163,7 @@ Logs estructurados con `requestId`; métricas de ETL (filas, rechazos, duración
 | ADR-011 | Parser Lua propio sin evaluación | **Aceptada** |
 | ADR-012 | Retención y agregación de precios (30 días crudos + agregados) | **Aceptada** (ajustada por ADR-013) |
 | ADR-013 | API-first con addon como complemento (reemplaza parcialmente a ADR-002 y ajusta ADR-009 y ADR-012) | **Aceptada** (2026-11-18) |
+| ADR-014 | SPA React (Vite + React Router) en lugar de Astro + islas (reemplaza a ADR-004) | **Aceptada** (2026-11-24) |
 
 ### ADR-002 (detalle)
 
@@ -172,6 +173,8 @@ Logs estructurados con `requestId`; métricas de ETL (filas, rechazos, duración
 - **Revisión**: cuando exista namespace de Forever en la API de Battle.net (ver [07](07-fuentes-de-datos-y-viabilidad.md)).
 
 ### ADR-004 (detalle)
+
+> **Reemplazada por ADR-014** (SPA React + Vite). Se conserva como registro histórico; ver [11](11-justificacion-de-decisiones-de-ingenieria.md).
 
 - **Opciones**: (a) SPA Vite + prerender; (b) **Astro + islas React**; (c) Next.js.
 - **Criterio decisivo**: miles de páginas de entidades y guías que deben ser indexables, con herramientas interactivas puntuales. React se mantiene como tecnología principal; Astro se justifica por SSG y por ser ya el stack del portafolio del autor.
