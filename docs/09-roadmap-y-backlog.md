@@ -70,7 +70,7 @@ Tamaño: S (≤ 1 día), M (2–3 días), L (≈ 1 semana).
 | H-013 | Paquete `optimizer`: probabilidad de skill-up y costo por punto | M | Tests unitarios por color; tipos exportados |
 | H-014 | `planProfession` con DAG de segmentos y costo fijo de patterns | L | Property tests + equivalencia con fuerza bruta |
 | H-015 | Estrategias (más barata, menos crafteos, sin BoP, solo vendor) | M | Cada una produce resultados distintos en casos de prueba |
-| H-016 | UI calculadora: formulario, resultado por pasos, lista de compras copiable | L | Accesible (axe sin violaciones críticas), responsive |
+| H-016 | UI calculadora: formulario, resultado por pasos, lista de compras copiable | L | Accesible (axe sin violaciones críticas), responsive. **Estado: prototipo hecho** (`apps/web`, `/calculadora`; datos de ejemplo, Worker, ES/EN, axe en CI). Pendiente: datos reales (H-011/H-012), revisión responsive en dispositivo, E2E (H-021) |
 | H-017 | Modelo y UI de precios con edad, obsoleto y override | M | Precio > umbral se marca; override recalcula la ruta |
 | H-018 | Fichas de ítem/receta con tooltips y fuentes de obtención | M | Enlaces cruzados; URLs canónicas |
 | H-019 | Búsqueda global ⌘/Ctrl+K | M | Resultados agrupados por tipo; navegable con teclado |
