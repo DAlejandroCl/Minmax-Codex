@@ -54,6 +54,7 @@ const es = {
     vendor: "Vendedor",
     auction: "Subasta",
     empty: "No hay nada que comprar.",
+    tableRegion: "Tabla de la lista de compras (desplazable)",
   },
 };
 
@@ -109,6 +110,7 @@ const en: typeof es = {
     vendor: "Vendor",
     auction: "Auction",
     empty: "Nothing to buy.",
+    tableRegion: "Shopping list table (scrollable)",
   },
 };
 
