@@ -1,0 +1,124 @@
+import i18next from "i18next";
+import type { i18n as I18nInstance } from "i18next";
+import type { Locale } from "../features/calculator/model";
+
+const es = {
+  title: "Calculadora de subida de profesión",
+  demoNotice:
+    "Datos de ejemplo: las recetas, precios y umbrales de color no son oficiales ni están medidos. Edita los precios para probar.",
+  form: {
+    legend: "Objetivo",
+    start: "Habilidad actual",
+    target: "Habilidad objetivo",
+    trainerOnly: "Solo recetas de entrenador (sin comprar patrones)",
+    prices: "Precios por unidad",
+    owned: "Ya lo tengo",
+    reset: "Restablecer",
+    gold: "Oro",
+    silver: "Plata",
+    copper: "Cobre",
+    errors: {
+      range: "La habilidad actual no puede superar el objetivo.",
+      bounds: "Introduce valores enteros entre 1 y 300.",
+    },
+  },
+  result: {
+    heading: "Plan",
+    computing: "Calculando…",
+    none: "No hay ruta posible con las recetas disponibles.",
+    error: "No se pudo calcular el plan.",
+    total: "Coste total estimado",
+    materials: "Materiales",
+    recipes: "Recetas y entrenamientos",
+    steps: "Pasos",
+    stepTitle: "{{from}} → {{to}}: {{count}} × {{recipe}}",
+    stepExplain:
+      "Coste de materiales: {{cost}} ({{perPoint}} por punto). Probabilidad de subir: {{start}} al empezar y {{end}} al terminar el tramo.",
+    acquisition: "Cómo se obtiene: {{how}}",
+    how: { known: "ya conocida", trainer: "entrenador ({{cost}})", pattern: "patrón ({{cost}})" },
+    milestone: "Hito: {{label}} ({{cost}})",
+  },
+  shopping: {
+    heading: "Lista de compras",
+    item: "Objeto",
+    source: "Origen",
+    needed: "Necesario",
+    have: "Tengo",
+    missing: "Falta",
+    price: "Precio",
+    subtotal: "Subtotal",
+    total: "Total",
+    copy: "Copiar lista",
+    copied: "Lista copiada al portapapeles.",
+    copyFailed: "No se pudo copiar; selecciona el texto manualmente.",
+    vendor: "Vendedor",
+    auction: "Subasta",
+    empty: "No hay nada que comprar.",
+  },
+};
+
+const en: typeof es = {
+  title: "Profession leveling calculator",
+  demoNotice:
+    "Sample data: recipes, prices and color thresholds are neither official nor measured. Edit the prices to try it.",
+  form: {
+    legend: "Goal",
+    start: "Current skill",
+    target: "Target skill",
+    trainerOnly: "Trainer recipes only (no purchased patterns)",
+    prices: "Price per unit",
+    owned: "Already owned",
+    reset: "Reset",
+    gold: "Gold",
+    silver: "Silver",
+    copper: "Copper",
+    errors: {
+      range: "Current skill cannot exceed the target.",
+      bounds: "Enter whole numbers between 1 and 300.",
+    },
+  },
+  result: {
+    heading: "Plan",
+    computing: "Calculating…",
+    none: "No route is possible with the available recipes.",
+    error: "The plan could not be calculated.",
+    total: "Estimated total cost",
+    materials: "Materials",
+    recipes: "Recipes and training",
+    steps: "Steps",
+    stepTitle: "{{from}} → {{to}}: {{count}} × {{recipe}}",
+    stepExplain:
+      "Materials cost: {{cost}} ({{perPoint}} per point). Skill-up chance: {{start}} at the start and {{end}} at the end of the range.",
+    acquisition: "How to get it: {{how}}",
+    how: { known: "already known", trainer: "trainer ({{cost}})", pattern: "pattern ({{cost}})" },
+    milestone: "Milestone: {{label}} ({{cost}})",
+  },
+  shopping: {
+    heading: "Shopping list",
+    item: "Item",
+    source: "Source",
+    needed: "Needed",
+    have: "Owned",
+    missing: "Missing",
+    price: "Price",
+    subtotal: "Subtotal",
+    total: "Total",
+    copy: "Copy list",
+    copied: "List copied to the clipboard.",
+    copyFailed: "Could not copy; select the text manually.",
+    vendor: "Vendor",
+    auction: "Auction",
+    empty: "Nothing to buy.",
+  },
+};
+
+export const i18n: I18nInstance = i18next.createInstance();
+void i18n.init({
+  lng: "es",
+  fallbackLng: "es",
+  resources: { es: { translation: es }, en: { translation: en } },
+  interpolation: { escapeValue: false },
+  initAsync: false,
+});
+
+export const LOCALES: readonly Locale[] = ["es", "en"];
