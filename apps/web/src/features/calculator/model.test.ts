@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { buildShoppingList, computePlan, defaultPrices, validateInputs } from "./model";
+import {
+  buildShoppingList,
+  computePlan,
+  defaultPrices,
+  difficultyOf,
+  validateInputs,
+} from "./model";
 import type { CalculatorInputs } from "./model";
 import { buildShoppingText } from "./format";
 
@@ -97,5 +103,14 @@ describe("lista de compras", () => {
     expect(text).toContain("3× B");
     expect(text).not.toContain("A —");
     expect(text).toContain("Total: 3s");
+  });
+});
+
+describe("difficultyOf", () => {
+  it("usa los colores de dificultad del juego", () => {
+    expect(difficultyOf(1)).toBe("orange");
+    expect(difficultyOf(0.76)).toBe("yellow");
+    expect(difficultyOf(0.32)).toBe("green");
+    expect(difficultyOf(0)).toBe("grey");
   });
 });
