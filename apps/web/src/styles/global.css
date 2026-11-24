@@ -1,1 +1,14 @@
 @import "tailwindcss";
+
+/* Los fieldset tienen min-width: min-content por defecto y desbordan el layout en pantallas estrechas. */
+fieldset {
+  min-width: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  overflow-wrap: anywhere;
+}
