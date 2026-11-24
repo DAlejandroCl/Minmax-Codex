@@ -7,7 +7,7 @@ import type { Locale } from "../model";
 export function PlanSteps({ plan, locale }: { readonly plan: Plan; readonly locale: Locale }) {
   const { t } = useTranslation();
   return (
-    <section aria-labelledby="steps-heading" className="flex flex-col gap-3">
+    <section aria-labelledby="steps-heading" className="flex min-w-0 flex-col gap-3">
       <h3 id="steps-heading" className="text-lg font-semibold">
         {t("result.steps")}
       </h3>
