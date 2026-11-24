@@ -32,46 +32,55 @@ export function CalculatorForm({ locale }: { readonly locale: Locale }) {
     </div>
   );
   return (
-    <form className="flex flex-col gap-4" onSubmit={(e) => e.preventDefault()} noValidate>
-      <fieldset className="flex flex-wrap items-end gap-4">
+    <form className="flex min-w-0 flex-col gap-6" onSubmit={(e) => e.preventDefault()} noValidate>
+      <fieldset className="flex flex-col gap-3">
         <legend className="mb-2 text-lg font-semibold">{t("form.legend")}</legend>
-        {numberField("start", s.startSkill, s.setStartSkill)}
-        {numberField("target", s.targetSkill, s.setTargetSkill)}
-        <label className="flex items-center gap-2">
+        <div className="flex flex-wrap gap-4">
+          {numberField("start", s.startSkill, s.setStartSkill)}
+          {numberField("target", s.targetSkill, s.setTargetSkill)}
+        </div>
+        <label className="flex items-start gap-2">
           <input
             type="checkbox"
+            className="mt-1 shrink-0"
             checked={s.trainerOnly}
             onChange={(e) => s.setTrainerOnly(e.target.checked)}
           />
-          {t("form.trainerOnly")}
+          <span>{t("form.trainerOnly")}</span>
         </label>
+        <p id={errorId} role="alert" className="text-red-700 empty:hidden">
+          {error === null ? "" : t(`form.errors.${error}`)}
+        </p>
       </fieldset>
-      <p id={errorId} role="alert" className="min-h-6 text-red-700">
-        {error === null ? "" : t(`form.errors.${error}`)}
-      </p>
       <fieldset className="flex flex-col gap-3">
         <legend className="mb-2 text-lg font-semibold">{t("form.prices")}</legend>
-        {DEMO_ITEMS.map((item) => (
-          <div key={item.id} className="flex flex-wrap items-center justify-between gap-2">
-            <span className="min-w-36 font-medium">{item.name[locale]}</span>
-            <MoneyInput
-              label={`${item.name[locale]} · ${t("form.prices")}`}
-              value={s.prices[item.id] ?? 0}
-              onChange={(v) => s.setPrice(item.id, v)}
-            />
-            <label className="flex items-center gap-2 text-sm">
-              {t("form.owned")}
-              <input
-                type="number"
-                min={0}
-                aria-label={`${item.name[locale]} · ${t("form.owned")}`}
-                className="w-20 rounded border border-slate-500 bg-white px-2 py-1 text-slate-900"
-                value={s.owned[item.id] ?? 0}
-                onChange={(e) => s.setOwned(item.id, e.target.valueAsNumber)}
+        <ul className="flex flex-col gap-3">
+          {DEMO_ITEMS.map((item) => (
+            <li
+              key={item.id}
+              className="grid grid-cols-1 gap-2 rounded border border-slate-300 p-3 sm:grid-cols-[minmax(7rem,1fr)_auto_auto] sm:items-center sm:gap-4"
+            >
+              <span className="font-medium">{item.name[locale]}</span>
+              <MoneyInput
+                label={`${item.name[locale]} · ${t("form.prices")}`}
+                value={s.prices[item.id] ?? 0}
+                onChange={(v) => s.setPrice(item.id, v)}
               />
-            </label>
-          </div>
-        ))}
+              <label className="flex items-center gap-2 text-sm">
+                <span>{t("form.owned")}</span>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  aria-label={`${item.name[locale]} · ${t("form.owned")}`}
+                  className="w-20 rounded border border-slate-500 bg-white px-2 py-1 text-slate-900"
+                  value={s.owned[item.id] ?? 0}
+                  onChange={(e) => s.setOwned(item.id, e.target.valueAsNumber)}
+                />
+              </label>
+            </li>
+          ))}
+        </ul>
       </fieldset>
       <button
         type="button"
