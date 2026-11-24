@@ -33,7 +33,7 @@
 | 001 | Monorepo pnpm + Turborepo | Aceptada | No |
 | 002 | Personajes por exportación de addon + importación de archivo | Aceptada (reemplazada parcialmente por ADR-013) | No |
 | 003 | `optimizer` como paquete puro, ejecutado en Web Worker | Aceptada | No |
-| 004 | Astro (SSG) + islas React | Aceptada, condicionada a SP-6 | No |
+| 004 | Astro (SSG) + islas React | **Reemplazada por ADR-014 (2026-11-24)** | No |
 | 005 | Datos de juego versionados por build, servidos estáticos | Aceptada | No |
 | 006 | Dinero como entero en cobre | Aceptada | No |
 | 007 | **Drizzle ORM** (+ drizzle-kit) | Aceptada | **Resuelta** (antes abierta) |
@@ -43,6 +43,7 @@
 | 011 | **Parser Lua propio, sin evaluación** | Aceptada | Nueva |
 | 012 | **Retención y agregación de precios** | Aceptada (ajustada por ADR-013) | Nueva |
 | 013 | **API-first con addon como complemento** | **Aceptada (2026-11-18)** | Nueva (2026-11-16) |
+| 014 | **SPA React (Vite + React Router)** en lugar de Astro + islas | **Aceptada (2026-11-24)** | Nueva |
 
 ---
 
@@ -74,6 +75,8 @@
 - **Revisar si**: el cálculo supera presupuesto en móviles de gama baja (RNF-02) → mover a servidor con caché por parámetros.
 
 ### ADR-004 · Astro (SSG) + islas React para contenido público
+> **Estado: reemplazada por [ADR-014](#adr-014--spa-react-vite--react-router-en-lugar-de-astro--islas-reemplaza-a-adr-004).** Se conserva el texto original como registro histórico.
+
 - **Contexto**: se requieren miles de páginas indexables (ítems, recetas, guías) y herramientas interactivas puntuales.
 - **Opciones y evaluación** (peso entre paréntesis; puntuación 1–5; total sobre 100):
 
@@ -218,6 +221,23 @@
 - **Reversibilidad**: alta (el addon de ADR-002 sigue siendo el plan B funcional).
 - **Revisar si**: Blizzard publica documentación oficial, restringe los endpoints o aclara los Términos.
 
+### ADR-014 · SPA React (Vite + React Router) en lugar de Astro + islas *(reemplaza a ADR-004)*
+- **Fecha**: 2026-11-24.
+- **Contexto**: el prototipo (H-016/H-017) se construyó con Astro + islas React. El autor decide que el proyecto debe reflejar su dominio de **React** (su objetivo es postular a puestos de desarrollo frontend React). Todo el producto activo es interactivo (calculadora, precios, estrategias) y las páginas públicas indexables (wiki por clase, ítems, guías) **aún no existen**.
+- **Opciones**: (a) **SPA Vite + React Router**; (b) Astro + islas React (ADR-004); (c) Next.js.
+- **Decisión**: SPA de React 19 con Vite, React Router 8 (`BrowserRouter`), rutas cargadas con `React.lazy` + `Suspense` y el optimizador en un Web Worker que Vite emite como chunk propio (ADR-003 se mantiene).
+- **Justificación**: ADR-004 ganó por 84 a 78 por SEO y rendimiento de carga, con margen estrecho y condicionado a SP-6. Aquí cambia el criterio decisivo: la **evidencia de competencia en React** del autor, y que el contenido público masivo todavía no existe. **No es un resultado medido de SP-6**: no se midió LCP ni SEO, y no se recalculó la matriz para no inventar puntuaciones.
+- **Consecuencias**:
+  - (+) Un solo modelo de ruteo y de componentes; desaparece el riesgo «dos modelos mentales» de ADR-004. Estado compartido sin mecanismo extra entre islas.
+  - (+) Build actual: chunk principal 322 kB (103 kB gzip) y chunk de la calculadora 80 kB (25 kB gzip), más el Worker aparte.
+  - (−) **Sin HTML estático por página**: el wiki público no será indexable por defecto. Camino de salida: prerender en build (plugin de prerender de Vite o React Router en modo framework) antes de publicar contenido público.
+  - (−) El hosting necesita un *fallback* de rutas (`/* → /index.html`); se resuelve en el despliegue (pendiente).
+  - (−) El LCP de las rutas públicas será peor que con SSG; medirlo cuando existan (RNF-01).
+  - **Ruteo**: React Router sustituye al TanStack Router citado en [06](06-arquitectura.md), por ser el más extendido en el mercado laboral. Se pierde el tipado de rutas; es reversible.
+- **Reversibilidad**: alta. Componentes, estado y lógica no dependen del framework; solo cambian `main.tsx`, `App.tsx` y las páginas.
+- **Revisar si**: se adelanta el wiki público y el SEO pasa a ser prioritario, o el LCP supera el objetivo de RNF-01.
+- **SP-6**: cerrado por decisión, sin medición.
+
 ---
 
 ## 4. Justificación del MVP (aprobado)
@@ -236,7 +256,7 @@
 
 | Principio | Aplicación |
 |-----------|-----------|
-| **Estático primero, dinámico donde hace falta** | ADR-004, 005 |
+| **Estático primero, dinámico donde hace falta** | ADR-005 |
 | **Núcleo puro, bordes impuros** | `optimizer`/`lua-parser` sin I/O; repositorios en los bordes |
 | **Esquemas como contrato** (Zod) | Una definición valida ETL, API y UI |
 | **Validar en cada frontera; no confiar en la entrada** | ADR-002, 011; RN-09 |
@@ -267,7 +287,7 @@
 
 - Cada ADR tiene **condiciones de revisión** (arriba); se revisan al cierre de cada fase junto con el registro de riesgos ([08](08-riesgos.md)).
 - Un cambio de decisión se registra como **nuevo ADR que sustituye** al anterior (no se reescribe la historia) y actualiza la tabla de [06](06-arquitectura.md).
-- Las decisiones condicionadas (ADR-004, parte de ADR-008) quedan **abiertas a validación** hasta cerrar sus spikes.
+- Las decisiones condicionadas (parte de ADR-008) quedan **abiertas a validación** hasta cerrar sus spikes.
 
 ## 8. Fuentes verificadas para esta revisión (2026-11-16)
 
