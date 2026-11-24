@@ -1,14 +1,107 @@
 @import "tailwindcss";
+@import "@fontsource-variable/alegreya";
+@import "@fontsource-variable/source-sans-3";
 
-/* Los fieldset tienen min-width: min-content por defecto y desbordan el layout en pantallas estrechas. */
-fieldset {
-  min-width: 0;
+@theme {
+  --font-display: "Alegreya Variable", Georgia, serif;
+  --font-sans: "Source Sans 3 Variable", system-ui, sans-serif;
+
+  /* Superficies: cuero oscuro y madera, como los paneles del juego. */
+  --color-bg: #15120f;
+  --color-panel: #1f1a15;
+  --color-raised: #2a231c;
+  --color-line: #4a3d2e;
+  --color-line-strong: #7a6642;
+
+  --color-text: #ece3d0;
+  --color-muted: #b9ac93;
+  --color-gold: #e6b94d;
+  --color-gold-ink: #1a1408;
+  --color-danger: #ff8f80;
+
+  /* Colores de dificultad de receta del juego. */
+  --color-diff-orange: #ff8040;
+  --color-diff-yellow: #ffd100;
+  --color-diff-green: #5fd35f;
+  --color-diff-grey: #a0a0a0;
+
+  /* Calidad de objeto: común (vendedor) y raro (subasta). */
+  --color-q-common: #ffffff;
+  --color-q-rare: #5aa9ff;
 }
 
-html {
-  -webkit-text-size-adjust: 100%;
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    color-scheme: dark;
+  }
+  body {
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+  /* Los fieldset tienen min-width: min-content por defecto y desbordan el layout en pantallas estrechas. */
+  fieldset {
+    min-width: 0;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: 0.01em;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 2px;
+  }
 }
 
-body {
-  overflow-wrap: anywhere;
+@layer components {
+  .panel {
+    background: var(--color-panel);
+    border: 1px solid var(--color-line);
+    border-radius: 0.375rem;
+  }
+  .field {
+    background: var(--color-bg);
+    border: 1px solid var(--color-line-strong);
+    border-radius: 0.25rem;
+    color: var(--color-text);
+    padding: 0.375rem 0.5rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .field:hover {
+    border-color: var(--color-gold);
+  }
+  .field[aria-invalid="true"] {
+    border-color: var(--color-danger);
+  }
+  .btn {
+    border: 1px solid var(--color-line-strong);
+    border-radius: 0.25rem;
+    padding: 0.375rem 0.875rem;
+    background: var(--color-raised);
+    color: var(--color-text);
+    cursor: pointer;
+  }
+  .btn:hover {
+    border-color: var(--color-gold);
+  }
+  .btn-primary {
+    background: var(--color-gold);
+    border-color: var(--color-gold);
+    color: var(--color-gold-ink);
+    font-weight: 600;
+  }
+  .btn-primary:hover {
+    background: #f3cb6b;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .route-segment {
+    transition: flex-grow 250ms ease;
+  }
 }
