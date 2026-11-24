@@ -165,6 +165,31 @@ export const DEMO_RECIPES: readonly RecipeInfo[] = [
       acquisition: pattern(50_000),
     },
   ),
+  // Solo materiales de vendedor: sirve para la estrategia «solo vendedor» hasta la habilidad ~185.
+  r(
+    109,
+    { es: "Brazales de hilo", en: "Thread bracers" },
+    {
+      minSkill: 100,
+      thresholds: { yellow: 150, grey: 185 },
+      reagents: [
+        { itemId: 1, quantity: 3 },
+        { itemId: 2, quantity: 1 },
+      ],
+      acquisition: { kind: "known" },
+    },
+  ),
+  // Patrón de botín (se liga al recogerlo): barato, pero la estrategia «sin botín» lo excluye.
+  r(
+    108,
+    { es: "Botas del rastreador", en: "Trapper's boots" },
+    {
+      minSkill: 185,
+      thresholds: { yellow: 235, grey: 270 },
+      reagents: [{ itemId: 2, quantity: 2 }],
+      acquisition: { kind: "pattern", cost: copper(0), bindsOnPickup: true },
+    },
+  ),
   // Intermedio: no sube habilidad (gris desde el principio); solo compite «comprar vs. fabricar».
   r(
     900,
