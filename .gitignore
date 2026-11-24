@@ -9,3 +9,7 @@ coverage/
 # Salidas de los spikes (pueden contener datos de personajes o tokens)
 tools/**/out/
 .DS_Store
+
+# Astro
+.astro/
+apps/web/dist/
