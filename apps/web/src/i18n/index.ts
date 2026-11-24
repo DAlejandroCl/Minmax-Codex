@@ -1,8 +1,24 @@
 import i18next from "i18next";
+import { initReactI18next } from "react-i18next";
 import type { i18n as I18nInstance } from "i18next";
 import type { Locale } from "../features/calculator/model";
 
 export const es = {
+  loading: "Cargando…",
+  home: {
+    pageTitle: "Minmax Codex",
+    tagline:
+      "Herramientas para sacar el máximo partido a tus personajes de WoW Forever, empezando por subir profesiones al menor coste.",
+    navLabel: "Herramientas",
+    openCalculator: "Abrir la calculadora de profesiones",
+  },
+  notFound: {
+    pageTitle: "Página no encontrada · Minmax Codex",
+    title: "Página no encontrada",
+    body: "La dirección no existe o ha cambiado.",
+    home: "Volver al inicio",
+  },
+  pageTitle: "Calculadora de profesiones · Minmax Codex",
   title: "Calculadora de subida de profesión",
   demoNotice:
     "Datos de ejemplo: las recetas, precios y umbrales de color no son oficiales ni están medidos. Edita los precios para probar.",
@@ -101,6 +117,21 @@ export const es = {
 };
 
 export const en: typeof es = {
+  loading: "Loading…",
+  home: {
+    pageTitle: "Minmax Codex",
+    tagline:
+      "Tools to get the most out of your WoW Forever characters, starting with leveling professions at the lowest cost.",
+    navLabel: "Tools",
+    openCalculator: "Open the profession calculator",
+  },
+  notFound: {
+    pageTitle: "Page not found · Minmax Codex",
+    title: "Page not found",
+    body: "The address does not exist or has changed.",
+    home: "Back to home",
+  },
+  pageTitle: "Profession calculator · Minmax Codex",
   title: "Profession leveling calculator",
   demoNotice:
     "Sample data: recipes, prices and color thresholds are neither official nor measured. Edit the prices to try it.",
@@ -199,7 +230,8 @@ export const en: typeof es = {
 };
 
 export const i18n: I18nInstance = i18next.createInstance();
-void i18n.init({
+// Registra esta instancia como la global de react-i18next: `useTranslation` funciona sin provider en toda la app.
+void i18n.use(initReactI18next).init({
   lng: "es",
   fallbackLng: "es",
   resources: { es: { translation: es }, en: { translation: en } },
@@ -208,3 +240,11 @@ void i18n.init({
 });
 
 export const LOCALES: readonly Locale[] = ["es", "en"];
+
+// El atributo lang del documento sigue al idioma de la interfaz (WCAG 3.1.1).
+if (typeof document !== "undefined") {
+  document.documentElement.lang = i18n.language;
+  i18n.on("languageChanged", (lng) => {
+    document.documentElement.lang = lng;
+  });
+}
