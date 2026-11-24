@@ -1,7 +1,7 @@
 import { copper } from "@minmax-codex/shared";
 import type { Copper } from "@minmax-codex/shared";
-import { planProfession, skillUpChance } from "@minmax-codex/optimizer";
-import type { ItemId, Plan, PlanInput, PlanStep, Recipe } from "@minmax-codex/optimizer";
+import { planAllStrategies, skillUpChance } from "@minmax-codex/optimizer";
+import type { ItemId, Plan, PlanInput, PlanStep, Recipe, Strategy } from "@minmax-codex/optimizer";
 import { DEMO_ITEMS, DEMO_MILESTONES, DEMO_RECIPES, SKILL_MAX, SKILL_MIN } from "./demo-data";
 import type { ItemInfo } from "./demo-data";
 
@@ -48,13 +48,25 @@ export function buildPlanInput(inputs: CalculatorInputs): PlanInput {
       Object.entries(inputs.prices).map(([id, p]) => [Number(id), copper(p)]),
     ),
     milestones: DEMO_MILESTONES,
+    vendorItems: new Set(DEMO_ITEMS.filter((i) => i.source === "vendor").map((i) => i.id)),
   };
 }
 
-/** Calcula el plan de forma síncrona (el mismo código se ejecuta en el Web Worker, ADR-003). */
-export function computePlan(inputs: CalculatorInputs): Plan | null {
+/** Un plan por estrategia (`null` si esa estrategia no tiene ruta). */
+export type Plans = Readonly<Record<Strategy, Plan | null>>;
+
+/** Calcula los planes de todas las estrategias (el mismo código se ejecuta en el Web Worker, ADR-003). */
+export function computePlans(inputs: CalculatorInputs): Plans | null {
   if (validateInputs(inputs) !== null) return null;
-  return planProfession(buildPlanInput(inputs));
+  return planAllStrategies(buildPlanInput(inputs));
+}
+
+/** Plan de una estrategia concreta, de forma síncrona. */
+export function computePlan(
+  inputs: CalculatorInputs,
+  strategy: Strategy = "cheapest",
+): Plan | null {
+  return computePlans(inputs)?.[strategy] ?? null;
 }
 
 export interface ShoppingRow {
