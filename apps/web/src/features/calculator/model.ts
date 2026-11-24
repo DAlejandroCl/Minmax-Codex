@@ -126,3 +126,13 @@ export function recipeName(id: number, locale: Locale): string {
 export function recipeById(id: number): Recipe | undefined {
   return DEMO_RECIPES.find((r) => r.recipe.id === id)?.recipe;
 }
+
+export type Difficulty = "orange" | "yellow" | "green" | "grey";
+
+/** Color de dificultad que el jugador ya conoce del juego, según la probabilidad de subir (0–1). */
+export function difficultyOf(chance: number): Difficulty {
+  if (chance >= 1) return "orange";
+  if (chance >= 0.5) return "yellow";
+  if (chance > 0) return "green";
+  return "grey";
+}
