@@ -10,9 +10,9 @@ vi.mock("@minmax-codex/optimizer", async (importOriginal) => {
   const real = await importOriginal<typeof Optimizer>();
   return {
     ...real,
-    planProfession: (input: Parameters<typeof real.planProfession>[0]) => {
+    planAllStrategies: (input: Parameters<typeof real.planAllStrategies>[0]) => {
       if (failing.on) throw new Error("fallo simulado");
-      return real.planProfession(input);
+      return real.planAllStrategies(input);
     },
   };
 });
