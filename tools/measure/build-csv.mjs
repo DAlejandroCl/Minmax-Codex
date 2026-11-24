@@ -28,7 +28,10 @@ const need = (file, hint) => {
 };
 
 const catalog = join(OUT, "catalog");
-need(join(catalog, "catalog-summary.json"), "ejecuta primero: pnpm --filter @minmax-codex/api-probe probe catalog");
+need(
+  join(catalog, "catalog-summary.json"),
+  "ejecuta primero: pnpm --filter @minmax-codex/api-probe probe catalog",
+);
 const tierFiles = readdirSync(join(catalog, "tiers"));
 const professions = [];
 for (const f of readdirSync(catalog).filter((n) => /^profession-\d+\.json$/.test(n))) {
@@ -47,19 +50,48 @@ for (const f of readdirSync(join(catalog, "recipes"))) {
 const reqFile = join(OUT, "patterns", "recipe-requirements.json");
 const patFile = join(OUT, "patterns", "patterns.json");
 const hasPatterns = existsSync(reqFile) && existsSync(patFile);
-if (!hasPatterns) console.warn("Aviso: sin patrones (ejecuta `probe patterns -- --details`); min_skill y vendors.csv quedarán vacíos.");
+if (!hasPatterns)
+  console.warn(
+    "Aviso: sin patrones (ejecuta `probe patterns -- --details`); min_skill y vendors.csv quedarán vacíos.",
+  );
 const requirements = new Map(hasPatterns ? read(reqFile).map((r) => [r.recipeId, r]) : []);
 const patterns = hasPatterns ? read(patFile) : [];
 
 const includeSod = process.argv.includes("--include-sod");
-const data = buildDatasets({ professions, recipes, requirements, patterns, ...(includeSod ? { excludeCategories: [] } : {}) });
-console.log(`Recetas excluidas (Season of Discovery): ${data.excluded.length}${includeSod ? " (desactivado con --include-sod)" : ""}`);
+const data = buildDatasets({
+  professions,
+  recipes,
+  requirements,
+  patterns,
+  ...(includeSod ? { excludeCategories: [] } : {}),
+});
+console.log(
+  `Recetas excluidas (Season of Discovery): ${data.excluded.length}${includeSod ? " (desactivado con --include-sod)" : ""}`,
+);
 const HEADERS = {
   recipes: Object.keys(data.recipes[0] ?? {}),
   excluded: Object.keys(data.recipes[0] ?? {}),
-  crafts: ["date", "profession", "recipe_id", "recipe", "skill_start", "color", "crafts", "skill_ups"],
+  crafts: [
+    "date",
+    "profession",
+    "recipe_id",
+    "recipe",
+    "skill_start",
+    "color",
+    "crafts",
+    "skill_ups",
+  ],
   colors: ["date", "profession", "recipe_id", "recipe", "req_skill", "skill", "color"],
-  trainers: ["date", "profession", "trainer", "zone", "recipe_id", "recipe", "req_skill", "cost_copper"],
+  trainers: [
+    "date",
+    "profession",
+    "trainer",
+    "zone",
+    "recipe_id",
+    "recipe",
+    "req_skill",
+    "cost_copper",
+  ],
   vendors: ["date", "vendor", "zone", "pattern", "cost_copper"],
 };
 
@@ -67,7 +99,11 @@ await mkdir(DATA, { recursive: true });
 for (const [name, rows] of Object.entries(data)) {
   const file = join(DATA, `${name}.csv`);
   if (existsSync(file) && !force && !["recipes", "excluded"].includes(name)) {
-    const measured = parseCsv(readFileSync(file, "utf8")).some((r) => Object.values(r).some((v) => v !== "") && (r.color || r.crafts || r.trainer || r.vendor || r.zone));
+    const measured = parseCsv(readFileSync(file, "utf8")).some(
+      (r) =>
+        Object.values(r).some((v) => v !== "") &&
+        (r.color || r.crafts || r.trainer || r.vendor || r.zone),
+    );
     if (measured) {
       console.log(`= ${name}.csv ya tiene datos medidos: se conserva (usa --force para regenerar)`);
       continue;
