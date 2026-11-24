@@ -31,7 +31,9 @@ if (mode === "crafts") {
     console.log(`${r.profession} · ${r.recipe} (req ${r.req ?? "?"})`);
     for (const [color, t] of Object.entries(r.transitions)) {
       const o = r.offsets[color];
-      console.log(`  → ${color}: habilidad ${t.low}–${t.high}${o ? `  (req + ${o.low}…${o.high})` : ""}`);
+      console.log(
+        `  → ${color}: habilidad ${t.low}–${t.high}${o ? `  (req + ${o.low}…${o.high})` : ""}`,
+      );
     }
   }
 }
