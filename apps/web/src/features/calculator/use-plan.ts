@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Plan } from "@minmax-codex/optimizer";
-import { buildPlanInput, computePlan, validateInputs } from "./model";
-import type { CalculatorInputs } from "./model";
+import { buildPlanInput, computePlans, validateInputs } from "./model";
+import type { CalculatorInputs, Plans } from "./model";
 import type { PlanResponse } from "./plan.worker";
 
 export type PlanState =
   | { readonly status: "invalid" }
   | { readonly status: "computing" }
-  | { readonly status: "ready"; readonly plan: Plan | null }
+  | { readonly status: "ready"; readonly plans: Plans }
   | { readonly status: "error"; readonly message: string };
 
 /**
@@ -41,7 +40,8 @@ export function usePlan(inputs: CalculatorInputs): readonly [PlanState, () => vo
     const id = counter.current;
     if (typeof Worker === "undefined") {
       try {
-        setState({ status: "ready", plan: computePlan(inputs) });
+        const plans = computePlans(inputs);
+        setState(plans === null ? { status: "invalid" } : { status: "ready", plans });
       } catch (error) {
         setState({
           status: "error",
@@ -57,7 +57,7 @@ export function usePlan(inputs: CalculatorInputs): readonly [PlanState, () => vo
       setState(
         "error" in event.data
           ? { status: "error", message: event.data.error }
-          : { status: "ready", plan: event.data.plan },
+          : { status: "ready", plans: event.data.plans },
       );
     };
     // Si el Worker no carga o revienta, se descarta para que el reintento cree uno nuevo.
