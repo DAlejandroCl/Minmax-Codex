@@ -32,7 +32,11 @@ export function csvCell(value) {
 }
 
 export function toCsv(headers, rows) {
-  return [headers.join(","), ...rows.map((r) => headers.map((h) => csvCell(r[h])).join(","))].join("\n") + "\n";
+  return (
+    [headers.join(","), ...rows.map((r) => headers.map((h) => csvCell(r[h])).join(","))].join(
+      "\n",
+    ) + "\n"
+  );
 }
 
 /** Parsea un CSV (con comillas); ignora líneas vacías y comentarios (#). */
@@ -46,7 +50,9 @@ export function parseCsv(text) {
   return lines.slice(1).map((line, i) => {
     const cells = splitCsvLine(line);
     if (cells.length !== header.length) {
-      throw new Error(`Línea ${i + 2}: se esperaban ${header.length} columnas y hay ${cells.length}`);
+      throw new Error(
+        `Línea ${i + 2}: se esperaban ${header.length} columnas y hay ${cells.length}`,
+      );
     }
     return Object.fromEntries(header.map((h, j) => [h, cells[j]]));
   });
@@ -85,7 +91,8 @@ export function summarizeCrafts(rows, bandSize = 75) {
     if (!Number.isFinite(crafts) || !Number.isFinite(ups) || !Number.isFinite(skill)) {
       throw new Error(`Fila con valores no numéricos: ${JSON.stringify(r)}`);
     }
-    if (ups > crafts) throw new Error(`skill_ups (${ups}) mayor que crafts (${crafts}): ${r.recipe}`);
+    if (ups > crafts)
+      throw new Error(`skill_ups (${ups}) mayor que crafts (${crafts}): ${r.recipe}`);
     const key = `${color}|${skillBand(skill, bandSize)}`;
     const cell = cells.get(key) ?? { color, band: skillBand(skill, bandSize), crafts: 0, ups: 0 };
     cell.crafts += crafts;
@@ -104,7 +111,11 @@ export function summarizeCrafts(rows, bandSize = 75) {
         craftsPerPoint: c.ups > 0 ? c.crafts / c.ups : Infinity,
       };
     })
-    .sort((a, b) => COLORS.indexOf(a.color) - COLORS.indexOf(b.color) || a.band.localeCompare(b.band, "en", { numeric: true }));
+    .sort(
+      (a, b) =>
+        COLORS.indexOf(a.color) - COLORS.indexOf(b.color) ||
+        a.band.localeCompare(b.band, "en", { numeric: true }),
+    );
 }
 
 /** Tamaño de muestra para un semiancho `e` con proporción esperada `p`. */
@@ -124,7 +135,12 @@ export function colorTransitions(rows) {
     if (!COLORS.includes(color)) throw new Error(`Color desconocido: ${r.color}`);
     // Varias recetas comparten nombre (p. ej. variantes de Season of Discovery): la clave es el id.
     const key = `${r.profession}|${r.recipe_id || r.recipe}`;
-    const list = byRecipe.get(key) ?? { profession: r.profession, recipe: r.recipe, req: r.req_skill === "" ? null : Number(r.req_skill), obs: [] };
+    const list = byRecipe.get(key) ?? {
+      profession: r.profession,
+      recipe: r.recipe,
+      req: r.req_skill === "" ? null : Number(r.req_skill),
+      obs: [],
+    };
     list.obs.push({ skill: Number(r.skill), color });
     byRecipe.set(key, list);
   }
@@ -136,7 +152,9 @@ export function colorTransitions(rows) {
       const prev = rec.obs[i - 1];
       const cur = rec.obs[i];
       if (COLORS.indexOf(cur.color) < COLORS.indexOf(prev.color)) {
-        throw new Error(`Color retrocede en ${rec.recipe}: ${prev.color} (${prev.skill}) → ${cur.color} (${cur.skill})`);
+        throw new Error(
+          `Color retrocede en ${rec.recipe}: ${prev.color} (${prev.skill}) → ${cur.color} (${cur.skill})`,
+        );
       }
       if (cur.color !== prev.color) {
         transitions[cur.color] = { low: prev.skill + 1, high: cur.skill };
@@ -161,7 +179,8 @@ export function colorTransitions(rows) {
 /** Nombre en texto aunque la API devuelva un objeto por idioma. */
 export function nameOf(value) {
   if (typeof value === "string") return value;
-  if (value && typeof value === "object") return value.en_US ?? Object.values(value).find((v) => typeof v === "string") ?? "";
+  if (value && typeof value === "object")
+    return value.en_US ?? Object.values(value).find((v) => typeof v === "string") ?? "";
   return "";
 }
 
@@ -177,8 +196,19 @@ export function quantityOf(q) {
 }
 
 export const RECIPE_HEADERS = [
-  "profession", "recipe_id", "recipe", "tier", "category", "crafted_item_id", "crafted_quantity",
-  "reagent_count", "min_skill", "pattern_item_id", "pattern_name", "reputation", "binding",
+  "profession",
+  "recipe_id",
+  "recipe",
+  "tier",
+  "category",
+  "crafted_item_id",
+  "crafted_quantity",
+  "reagent_count",
+  "min_skill",
+  "pattern_item_id",
+  "pattern_name",
+  "reputation",
+  "binding",
 ];
 
 /**
@@ -189,7 +219,13 @@ export const RECIPE_HEADERS = [
  */
 export const EXCLUDED_CATEGORIES = ["SEASON OF DISCOVERY"];
 
-export function buildDatasets({ professions, recipes, requirements, patterns = [], excludeCategories = EXCLUDED_CATEGORIES }) {
+export function buildDatasets({
+  professions,
+  recipes,
+  requirements,
+  patterns = [],
+  excludeCategories = EXCLUDED_CATEGORIES,
+}) {
   const excludedSet = new Set(excludeCategories.map((c) => c.toLowerCase()));
   const excluded = [];
   const catalog = [];
@@ -222,20 +258,47 @@ export function buildDatasets({ professions, recipes, requirements, patterns = [
       }
     }
   }
-  catalog.sort((a, b) => a.profession.localeCompare(b.profession) || a.recipe.localeCompare(b.recipe) || a.recipe_id - b.recipe_id);
+  catalog.sort(
+    (a, b) =>
+      a.profession.localeCompare(b.profession) ||
+      a.recipe.localeCompare(b.recipe) ||
+      a.recipe_id - b.recipe_id,
+  );
   // Un patrón se descarta solo si todas las recetas que lo usan están excluidas.
   const keptPatterns = new Set(catalog.map((r) => r.pattern_item_id).filter((x) => x !== ""));
-  const droppedPatterns = new Set(excluded.map((r) => r.pattern_item_id).filter((x) => x !== "" && !keptPatterns.has(x)));
+  const droppedPatterns = new Set(
+    excluded.map((r) => r.pattern_item_id).filter((x) => x !== "" && !keptPatterns.has(x)),
+  );
   const base = (r) => ({ profession: r.profession, recipe_id: r.recipe_id, recipe: r.recipe });
   return {
     recipes: catalog,
-    crafts: catalog.map((r) => ({ date: "", ...base(r), skill_start: "", color: "", crafts: "", skill_ups: "" })),
-    colors: catalog.map((r) => ({ date: "", ...base(r), req_skill: r.min_skill, skill: "", color: "" })),
+    crafts: catalog.map((r) => ({
+      date: "",
+      ...base(r),
+      skill_start: "",
+      color: "",
+      crafts: "",
+      skill_ups: "",
+    })),
+    colors: catalog.map((r) => ({
+      date: "",
+      ...base(r),
+      req_skill: r.min_skill,
+      skill: "",
+      color: "",
+    })),
     trainers: catalog
       .filter((r) => r.pattern_item_id === "")
       .map((r) => ({ date: "", ...base(r), trainer: "", zone: "", req_skill: "", cost_copper: "" }))
       .map(({ profession, recipe_id, recipe, date, trainer, zone, req_skill, cost_copper }) => ({
-        date, profession, trainer, zone, recipe_id, recipe, req_skill, cost_copper,
+        date,
+        profession,
+        trainer,
+        zone,
+        recipe_id,
+        recipe,
+        req_skill,
+        cost_copper,
       })),
     excluded,
     vendors: patterns
@@ -293,7 +356,15 @@ export function expandCheckpoint(sheetRows, { skill, codes, date = "" }) {
     const color = COLOR_CODES[code];
     if (!color) throw new Error(`Código de color desconocido «${code}» (usa o, y, g, x o -)`);
     const r = sheetRows[i];
-    out.push({ date, profession: r.profession, recipe_id: r.recipe_id, recipe: r.recipe, req_skill: r.req_skill, skill: String(skill), color });
+    out.push({
+      date,
+      profession: r.profession,
+      recipe_id: r.recipe_id,
+      recipe: r.recipe,
+      req_skill: r.req_skill,
+      skill: String(skill),
+      color,
+    });
   });
   return out;
 }
@@ -334,7 +405,8 @@ export function routeReagents(steps, recipes) {
       continue;
     }
     const crafts = Number(step.crafts);
-    for (const r of recipe.reagents ?? []) add(needs, nameOf(r.reagent?.name), crafts * (r.quantity ?? 0));
+    for (const r of recipe.reagents ?? [])
+      add(needs, nameOf(r.reagent?.name), crafts * (r.quantity ?? 0));
     if (step.type === "material") {
       const q = quantityOf(recipe.crafted_quantity);
       add(produced, nameOf(recipe.crafted_item?.name), crafts * (typeof q === "number" ? q : 1));
