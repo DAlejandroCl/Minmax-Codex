@@ -22,7 +22,7 @@ export function ShoppingListView({ list }: { readonly list: ShoppingList }) {
   };
 
   return (
-    <section aria-labelledby="shopping-heading" className="flex flex-col gap-3">
+    <section aria-labelledby="shopping-heading" className="flex min-w-0 flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 id="shopping-heading" className="text-lg font-semibold">
           {t("shopping.heading")}
@@ -41,8 +41,13 @@ export function ShoppingListView({ list }: { readonly list: ShoppingList }) {
       {list.rows.length === 0 ? (
         <p>{t("shopping.empty")}</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left text-sm">
+        <div
+          className="overflow-x-auto"
+          role="region"
+          tabIndex={0}
+          aria-label={t("shopping.tableRegion")}
+        >
+          <table className="w-full min-w-[34rem] border-collapse text-left text-sm [overflow-wrap:normal]">
             <caption className="sr-only">{t("shopping.heading")}</caption>
             <thead>
               <tr className="border-b border-slate-500">
