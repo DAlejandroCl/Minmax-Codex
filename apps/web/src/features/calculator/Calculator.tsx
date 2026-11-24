@@ -6,6 +6,7 @@ import { CalculatorForm } from "./components/CalculatorForm";
 import { PlanSteps } from "./components/PlanSteps";
 import { ShoppingListView } from "./components/ShoppingListView";
 import { StatePanel } from "./components/StatePanel";
+import { StrategySelector } from "./components/StrategySelector";
 import { DEMO_ITEMS } from "./demo-data";
 import { money } from "./format";
 import { buildShoppingList } from "./model";
@@ -33,7 +34,8 @@ export default function Calculator() {
     [inputs.startSkill, inputs.targetSkill, inputs.trainerOnly, inputs.prices, inputs.owned],
   );
   const [state, retry] = usePlan(planInputs);
-  const plan = state.status === "ready" ? state.plan : null;
+  const plans = state.status === "ready" ? state.plans : null;
+  const plan = plans?.[inputs.strategy] ?? null;
 
   const list = useMemo(
     () => (plan ? buildShoppingList(plan, planInputs, locale) : null),
@@ -104,6 +106,8 @@ export default function Calculator() {
               {announcement}
             </p>
 
+            <StrategySelector plans={plans} value={inputs.strategy} onChange={inputs.setStrategy} />
+
             {state.status === "invalid" && (
               <StatePanel tone="warning" title={t("state.invalid.title")}>
                 {t("state.invalid.body")}
@@ -118,7 +122,7 @@ export default function Calculator() {
                 {t("state.error.body")}
               </StatePanel>
             )}
-            {state.status === "ready" && state.plan === null && (
+            {state.status === "ready" && plan === null && (
               <StatePanel
                 tone="info"
                 title={t("state.none.title")}
@@ -129,9 +133,20 @@ export default function Calculator() {
                         onClick: () => inputs.setTrainerOnly(false),
                       },
                     }
-                  : {})}
+                  : inputs.strategy !== "cheapest"
+                    ? {
+                        action: {
+                          label: t("state.none.useCheapest"),
+                          onClick: () => inputs.setStrategy("cheapest"),
+                        },
+                      }
+                    : {})}
               >
-                {inputs.trainerOnly ? t("state.none.bodyTrainer") : t("state.none.body")}
+                {inputs.trainerOnly
+                  ? t("state.none.bodyTrainer")
+                  : inputs.strategy !== "cheapest"
+                    ? t("state.none.bodyStrategy")
+                    : t("state.none.body")}
               </StatePanel>
             )}
 
