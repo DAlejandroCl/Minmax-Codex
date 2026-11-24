@@ -29,18 +29,18 @@ export function MoneyInput({ label, value, onChange }: Props) {
         min={0}
         {...(max === undefined ? {} : { max })}
         aria-label={`${label} — ${text}`}
-        className="w-20 rounded border border-slate-500 bg-white px-2 py-1 text-slate-900"
+        className="w-16 rounded border border-slate-500 bg-white px-2 py-1 text-slate-900"
         value={current}
         onChange={(e) => {
           const next = toInt(e.target.value) * factor;
           onChange(value - current * factor + next);
         }}
       />
-      <span aria-hidden="true">{text.charAt(0).toLowerCase()}</span>
+      <span aria-hidden="true">{suffix}</span>
     </label>
   );
   return (
-    <div role="group" aria-label={label} className="flex flex-wrap gap-2">
+    <div role="group" aria-label={label} className="flex flex-wrap gap-x-3 gap-y-2">
       {field("g", t("form.gold"), gold, 10_000)}
       {field("s", t("form.silver"), silver, 100, 99)}
       {field("c", t("form.copper"), cop, 1, 99)}
