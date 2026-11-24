@@ -395,3 +395,22 @@ test("findRecipes busca por id, nombre exacto y parcial", () => {
     [1],
   );
 });
+
+import { fitThresholds } from "./lib.mjs";
+
+test("fitThresholds recupera umbrales conocidos a partir de sus crafteos", () => {
+  const t = { yellow: 184, grey: 200 };
+  const segs = [
+    { from: 165, to: 195, crafts: Math.ceil(expectedCrafts(165, 195, t)) },
+    { from: 196, to: 197, crafts: Math.ceil(expectedCrafts(196, 197, t)) },
+  ];
+  const fit = fitThresholds(new Map([["h", segs]]), { gaps: [10, 16, 20, 30], preferGap: 16 });
+  assert.equal(fit.gap, 16);
+  assert.equal(fit.fits.get("h").yellow, 184);
+  assert.equal(fit.fits.get("h").ceilErr, 0);
+});
+
+test("fitThresholds: un tramo todo naranja toma el menor amarillo compatible", () => {
+  const fit = fitThresholds(new Map([["o", [{ from: 155, to: 165, crafts: 10 }]]]), { gaps: [20] });
+  assert.equal(fit.fits.get("o").yellow, 164);
+});
