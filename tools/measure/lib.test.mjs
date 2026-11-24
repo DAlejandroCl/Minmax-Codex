@@ -1,10 +1,20 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseCsv, wilson, skillBand, summarizeCrafts, sampleSize, colorTransitions } from "./lib.mjs";
+import {
+  parseCsv,
+  wilson,
+  skillBand,
+  summarizeCrafts,
+  sampleSize,
+  colorTransitions,
+} from "./lib.mjs";
 
 test("parseCsv ignora comentarios y líneas vacías", () => {
   const rows = parseCsv("# c\na,b\n\n1,2\n3,4\n");
-  assert.deepEqual(rows, [{ a: "1", b: "2" }, { a: "3", b: "4" }]);
+  assert.deepEqual(rows, [
+    { a: "1", b: "2" },
+    { a: "3", b: "4" },
+  ]);
 });
 
 test("parseCsv falla con columnas incorrectas", () => {
@@ -48,8 +58,20 @@ test("summarizeCrafts suma por color y tramo", () => {
 });
 
 test("summarizeCrafts rechaza subidas > crafteos y colores desconocidos", () => {
-  assert.throws(() => summarizeCrafts([{ recipe: "A", color: "yellow", skill_start: "1", crafts: "1", skill_ups: "2" }]), /mayor/);
-  assert.throws(() => summarizeCrafts([{ recipe: "A", color: "blue", skill_start: "1", crafts: "1", skill_ups: "0" }]), /desconocido/);
+  assert.throws(
+    () =>
+      summarizeCrafts([
+        { recipe: "A", color: "yellow", skill_start: "1", crafts: "1", skill_ups: "2" },
+      ]),
+    /mayor/,
+  );
+  assert.throws(
+    () =>
+      summarizeCrafts([
+        { recipe: "A", color: "blue", skill_start: "1", crafts: "1", skill_ups: "0" },
+      ]),
+    /desconocido/,
+  );
 });
 
 test("colorTransitions estima intervalos y offsets respecto al requisito", () => {
@@ -83,8 +105,14 @@ test("CSV: ida y vuelta con comas y comillas", () => {
 });
 
 test("filas pendientes (vacías) se omiten en el análisis", () => {
-  assert.deepEqual(summarizeCrafts([{ recipe: "A", color: "", skill_start: "", crafts: "", skill_ups: "" }]), []);
-  assert.deepEqual(colorTransitions([{ profession: "P", recipe: "A", req_skill: "5", skill: "", color: "" }]), []);
+  assert.deepEqual(
+    summarizeCrafts([{ recipe: "A", color: "", skill_start: "", crafts: "", skill_ups: "" }]),
+    [],
+  );
+  assert.deepEqual(
+    colorTransitions([{ profession: "P", recipe: "A", req_skill: "5", skill: "", color: "" }]),
+    [],
+  );
 });
 
 test("nameOf acepta texto u objeto por idioma", () => {
@@ -95,19 +123,64 @@ test("nameOf acepta texto u objeto por idioma", () => {
 
 test("buildDatasets: catálogo por profesión con requisitos y trainers sin patrón", () => {
   const professions = [
-    { name: "Tailoring", tiers: [{ name: "T", categories: [{ name: "Cat", recipes: [{ id: 2, name: "B, Greater" }, { id: 1, name: "A" }] }] }] },
-    { name: "Cooking", tiers: [{ name: "T", categories: [{ name: "Cat", recipes: [{ id: 2, name: "B, Greater" }] }] }] },
+    {
+      name: "Tailoring",
+      tiers: [
+        {
+          name: "T",
+          categories: [
+            {
+              name: "Cat",
+              recipes: [
+                { id: 2, name: "B, Greater" },
+                { id: 1, name: "A" },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "Cooking",
+      tiers: [
+        { name: "T", categories: [{ name: "Cat", recipes: [{ id: 2, name: "B, Greater" }] }] },
+      ],
+    },
   ];
-  const recipes = new Map([[1, { crafted_item: { id: 10 }, crafted_quantity: 2, reagents: [{}, {}] }]]);
-  const requirements = new Map([[2, { minSkill: 65, patternItemId: 99, patternName: "Pattern: B", reputation: null, binding: null }]]);
-  const d = buildDatasets({ professions, recipes, requirements, patterns: [{ id: 99, name: "Pattern: B" }] });
+  const recipes = new Map([
+    [1, { crafted_item: { id: 10 }, crafted_quantity: 2, reagents: [{}, {}] }],
+  ]);
+  const requirements = new Map([
+    [
+      2,
+      {
+        minSkill: 65,
+        patternItemId: 99,
+        patternName: "Pattern: B",
+        reputation: null,
+        binding: null,
+      },
+    ],
+  ]);
+  const d = buildDatasets({
+    professions,
+    recipes,
+    requirements,
+    patterns: [{ id: 99, name: "Pattern: B" }],
+  });
   assert.equal(d.recipes.length, 3);
   assert.ok(d.colors.every((r) => "recipe_id" in r)); // B aparece en dos profesiones
   const a = d.recipes.find((r) => r.recipe === "A");
   assert.equal(a.crafted_item_id, 10);
   assert.equal(a.reagent_count, 2);
-  assert.equal(d.colors.find((r) => r.recipe === "B, Greater" && r.profession === "Tailoring").req_skill, 65);
-  assert.deepEqual(d.trainers.map((r) => r.recipe), ["A"]); // solo la receta sin patrón
+  assert.equal(
+    d.colors.find((r) => r.recipe === "B, Greater" && r.profession === "Tailoring").req_skill,
+    65,
+  );
+  assert.deepEqual(
+    d.trainers.map((r) => r.recipe),
+    ["A"],
+  ); // solo la receta sin patrón
   assert.equal(d.vendors.length, 1);
 });
 
@@ -132,40 +205,99 @@ test("colorTransitions distingue recetas con el mismo nombre por recipe_id", () 
 
 test("buildDatasets excluye la categoría SoD y sus patrones exclusivos", () => {
   const professions = [
-    { name: "Alchemy", tiers: [{ name: "T", categories: [
-      { name: "Elixirs", recipes: [{ id: 1, name: "Lesser Arcane Elixir" }] },
-      { name: "SEASON OF DISCOVERY", recipes: [{ id: 2, name: "Lesser Arcane Elixir" }, { id: 3, name: "Solo SoD" }] },
-    ] }] },
+    {
+      name: "Alchemy",
+      tiers: [
+        {
+          name: "T",
+          categories: [
+            { name: "Elixirs", recipes: [{ id: 1, name: "Lesser Arcane Elixir" }] },
+            {
+              name: "SEASON OF DISCOVERY",
+              recipes: [
+                { id: 2, name: "Lesser Arcane Elixir" },
+                { id: 3, name: "Solo SoD" },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ];
   const requirements = new Map([
     [1, { minSkill: 120, patternItemId: 10, patternName: "Recipe: A" }],
     [2, { minSkill: 190, patternItemId: 11, patternName: "Recipe: A SoD" }],
     [3, { minSkill: 200, patternItemId: 10, patternName: "Recipe: A" }],
   ]);
-  const patterns = [{ id: 10, name: "Recipe: A" }, { id: 11, name: "Recipe: A SoD" }];
+  const patterns = [
+    { id: 10, name: "Recipe: A" },
+    { id: 11, name: "Recipe: A SoD" },
+  ];
   const d = buildDatasets({ professions, recipes: new Map(), requirements, patterns });
-  assert.deepEqual(d.recipes.map((r) => r.recipe_id), [1]);
+  assert.deepEqual(
+    d.recipes.map((r) => r.recipe_id),
+    [1],
+  );
   assert.deepEqual(d.excluded.map((r) => r.recipe_id).sort(), [2, 3]);
-  assert.deepEqual(d.vendors.map((v) => v.pattern), ["Recipe: A"]); // el patrón 11 era solo SoD
-  const all = buildDatasets({ professions, recipes: new Map(), requirements, patterns, excludeCategories: [] });
+  assert.deepEqual(
+    d.vendors.map((v) => v.pattern),
+    ["Recipe: A"],
+  ); // el patrón 11 era solo SoD
+  const all = buildDatasets({
+    professions,
+    recipes: new Map(),
+    requirements,
+    patterns,
+    excludeCategories: [],
+  });
   assert.equal(all.recipes.length, 3);
 });
 
 import { selectM1 } from "./lib.mjs";
 
 test("selectM1 reparte por tramos y prefiere pocos reactivos sin reputación", () => {
-  const mk = (id, req, reagents, reputation = "") => ({ profession: "Tailoring", recipe_id: String(id), recipe: `R${id}`, min_skill: String(req), reagent_count: String(reagents), reputation });
-  const rows = [mk(1, 1, 3), mk(2, 5, 1), mk(3, 150, 2, "Friendly"), mk(4, 152, 5), mk(5, 300, 4), { ...mk(6, "", 1), min_skill: "" }];
+  const mk = (id, req, reagents, reputation = "") => ({
+    profession: "Tailoring",
+    recipe_id: String(id),
+    recipe: `R${id}`,
+    min_skill: String(req),
+    reagent_count: String(reagents),
+    reputation,
+  });
+  const rows = [
+    mk(1, 1, 3),
+    mk(2, 5, 1),
+    mk(3, 150, 2, "Friendly"),
+    mk(4, 152, 5),
+    mk(5, 300, 4),
+    { ...mk(6, "", 1), min_skill: "" },
+  ];
   const out = selectM1(rows, { profession: "tailoring", count: 3 });
-  assert.deepEqual(out.map((r) => r.recipe_id), ["2", "4", "5"]);
+  assert.deepEqual(
+    out.map((r) => r.recipe_id),
+    ["2", "4", "5"],
+  );
   assert.deepEqual(selectM1(rows, { profession: "Cooking" }), []);
 });
 
 test("selectM1 respeta minReq y maxReq", () => {
-  const mk = (id, req) => ({ profession: "P", recipe_id: String(id), recipe: `R${id}`, min_skill: String(req), reagent_count: "1", reputation: "" });
+  const mk = (id, req) => ({
+    profession: "P",
+    recipe_id: String(id),
+    recipe: `R${id}`,
+    min_skill: String(req),
+    reagent_count: "1",
+    reputation: "",
+  });
   const rows = [mk(1, 10), mk(2, 100), mk(3, 200)];
-  assert.deepEqual(selectM1(rows, { profession: "P", count: 5, maxReq: 150 }).map((r) => r.recipe_id), ["1", "2"]);
-  assert.deepEqual(selectM1(rows, { profession: "P", count: 5, minReq: 150 }).map((r) => r.recipe_id), ["3"]);
+  assert.deepEqual(
+    selectM1(rows, { profession: "P", count: 5, maxReq: 150 }).map((r) => r.recipe_id),
+    ["1", "2"],
+  );
+  assert.deepEqual(
+    selectM1(rows, { profession: "P", count: 5, minReq: 150 }).map((r) => r.recipe_id),
+    ["3"],
+  );
 });
 
 import { expandCheckpoint } from "./lib.mjs";
@@ -177,7 +309,13 @@ test("expandCheckpoint expande códigos de color y omite los no visibles", () =>
     { profession: "P", recipe_id: "3", recipe: "C", req_skill: "30" },
   ];
   const rows = expandCheckpoint(sheet, { skill: 25, codes: "g,y,-", date: "2026-11-20" });
-  assert.deepEqual(rows.map((r) => [r.recipe_id, r.color, r.skill]), [["1", "green", "25"], ["2", "yellow", "25"]]);
+  assert.deepEqual(
+    rows.map((r) => [r.recipe_id, r.color, r.skill]),
+    [
+      ["1", "green", "25"],
+      ["2", "yellow", "25"],
+    ],
+  );
   assert.throws(() => expandCheckpoint(sheet, { skill: 1, codes: "o,y" }), /3 recetas/);
   assert.throws(() => expandCheckpoint(sheet, { skill: 1, codes: "o,y,q" }), /desconocido/);
 });
@@ -202,9 +340,23 @@ test("expectedCrafts suma 1/p y es Infinity si hay gris", () => {
 import { routeReagents } from "./lib.mjs";
 
 test("routeReagents suma reactivos y descuenta intermedios", () => {
-  const hide = { id: 1, crafted_item: { name: "Cured Hide" }, crafted_quantity: { value: 1 }, reagents: [{ reagent: { name: "Leather" }, quantity: 2 }] };
-  const shoulders = { id: 2, reagents: [{ reagent: { name: "Cured Hide" }, quantity: 1 }, { reagent: { name: "Thread" }, quantity: 3 }] };
-  const recipes = new Map([[1, hide], [2, shoulders]]);
+  const hide = {
+    id: 1,
+    crafted_item: { name: "Cured Hide" },
+    crafted_quantity: { value: 1 },
+    reagents: [{ reagent: { name: "Leather" }, quantity: 2 }],
+  };
+  const shoulders = {
+    id: 2,
+    reagents: [
+      { reagent: { name: "Cured Hide" }, quantity: 1 },
+      { reagent: { name: "Thread" }, quantity: 3 },
+    ],
+  };
+  const recipes = new Map([
+    [1, hide],
+    [2, shoulders],
+  ]);
   const steps = [
     { type: "material", recipe_id: "1", crafts: "10" },
     { type: "train", recipe_id: "", crafts: "" },
@@ -226,8 +378,20 @@ test("findRecipes busca por id, nombre exacto y parcial", () => {
     { id: 2, name: "Rugged Armor Kit" },
     { id: 3, name: "Rugged Leather Pants" },
   ];
-  assert.deepEqual(findRecipes(rs, "2").map((r) => r.id), [2]);
-  assert.deepEqual(findRecipes(rs, "cured rugged hide").map((r) => r.id), [1]);
-  assert.deepEqual(findRecipes(rs, "rugged").map((r) => r.id), [1, 2, 3]);
-  assert.deepEqual(recipesCrafting(rs, "cured rugged hide").map((r) => r.id), [1]);
+  assert.deepEqual(
+    findRecipes(rs, "2").map((r) => r.id),
+    [2],
+  );
+  assert.deepEqual(
+    findRecipes(rs, "cured rugged hide").map((r) => r.id),
+    [1],
+  );
+  assert.deepEqual(
+    findRecipes(rs, "rugged").map((r) => r.id),
+    [1, 2, 3],
+  );
+  assert.deepEqual(
+    recipesCrafting(rs, "cured rugged hide").map((r) => r.id),
+    [1],
+  );
 });
