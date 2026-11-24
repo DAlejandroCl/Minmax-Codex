@@ -1,4 +1,5 @@
 import type { Copper } from "@minmax-codex/shared";
+import type { Strategy } from "./strategy.js";
 
 export type ItemId = number;
 export type RecipeId = number;
@@ -17,7 +18,12 @@ export interface Thresholds {
 export type Acquisition =
   | { readonly kind: "known" }
   | { readonly kind: "trainer"; readonly cost: Copper }
-  | { readonly kind: "pattern"; readonly cost: Copper };
+  | {
+      readonly kind: "pattern";
+      readonly cost: Copper;
+      /** Se liga al recogerlo (botín/misión): no se compra en la subasta. La estrategia `no-bop` lo excluye. */
+      readonly bindsOnPickup?: boolean;
+    };
 
 export interface Reagent {
   readonly itemId: ItemId;
@@ -52,6 +58,10 @@ export interface PlanInput {
   /** Valor de venta del ítem fabricado: se descuenta del coste (0 si falta). */
   readonly itemValues?: ReadonlyMap<ItemId, Copper>;
   readonly milestones?: readonly Milestone[];
+  /** Estrategia del plan; `cheapest` por defecto. */
+  readonly strategy?: Strategy;
+  /** Ítems que venden los PNJ. Obligatorio para la estrategia `vendor-only`. */
+  readonly vendorItems?: ReadonlySet<ItemId>;
 }
 
 export interface PlanStep {
@@ -68,7 +78,10 @@ export interface PlanStep {
 }
 
 export interface Plan {
+  readonly strategy: Strategy;
   readonly steps: readonly PlanStep[];
+  /** Crafteos esperados totales Σ 1/p (sin los intermedios). */
+  readonly expectedCrafts: number;
   /** Coste de adquirir cada receta usada, una sola vez por receta. */
   readonly acquisitionCost: Copper;
   readonly milestoneCost: Copper;
