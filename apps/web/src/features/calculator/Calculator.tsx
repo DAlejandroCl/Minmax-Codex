@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
-import { I18nextProvider, useTranslation } from "react-i18next";
-import { i18n, LOCALES } from "../../i18n";
+import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher, useLocale } from "../../components/LanguageSwitcher";
 import { ToastRegion } from "../toast/ToastRegion";
 import { CalculatorForm } from "./components/CalculatorForm";
 import { PlanSteps } from "./components/PlanSteps";
@@ -9,7 +9,6 @@ import { StatePanel } from "./components/StatePanel";
 import { DEMO_ITEMS } from "./demo-data";
 import { money } from "./format";
 import { buildShoppingList } from "./model";
-import type { Locale } from "./model";
 import { priceFlags } from "./prices";
 import { useCalculator } from "./store";
 import { usePlan } from "./use-plan";
@@ -17,13 +16,8 @@ import { usePlan } from "./use-plan";
 const skipLink =
   "sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-gold focus:px-3 focus:py-2 focus:text-gold-ink";
 
-function Inner({
-  locale,
-  setLocale,
-}: {
-  readonly locale: Locale;
-  readonly setLocale: (l: Locale) => void;
-}) {
+export default function Calculator() {
+  const locale = useLocale();
   const { t } = useTranslation();
   const inputs = useCalculator();
   const [now] = useState(() => Date.now());
@@ -75,6 +69,7 @@ function Inner({
 
   return (
     <>
+      <title>{t("pageTitle")}</title>
       <a href="#contenido" className={skipLink}>
         {t("skip.main")}
       </a>
@@ -88,20 +83,7 @@ function Inner({
       >
         <header className="flex flex-wrap items-start justify-between gap-3">
           <h1 className="text-3xl font-bold text-gold">{t("title")}</h1>
-          <div role="group" aria-label="Idioma / Language" className="flex gap-1">
-            {LOCALES.map((l) => (
-              <button
-                key={l}
-                type="button"
-                lang={l}
-                aria-pressed={l === locale}
-                onClick={() => setLocale(l)}
-                className="btn px-2.5 py-1 aria-pressed:border-gold aria-pressed:bg-gold aria-pressed:text-gold-ink"
-              >
-                {l.toUpperCase()}
-              </button>
-            ))}
-          </div>
+          <LanguageSwitcher />
         </header>
         <p role="note" className="panel border-l-4 border-l-diff-orange p-3 text-sm">
           {t("demoNotice")}
@@ -181,21 +163,5 @@ function Inner({
       </main>
       <ToastRegion />
     </>
-  );
-}
-
-export default function Calculator() {
-  const [locale, setLocale] = useState<Locale>("es");
-  useEffect(() => {
-    document.documentElement.lang = locale;
-  }, [locale]);
-  const change = (l: Locale): void => {
-    void i18n.changeLanguage(l);
-    setLocale(l);
-  };
-  return (
-    <I18nextProvider i18n={i18n}>
-      <Inner locale={locale} setLocale={change} />
-    </I18nextProvider>
   );
 }
