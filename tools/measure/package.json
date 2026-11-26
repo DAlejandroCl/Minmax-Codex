@@ -11,10 +11,11 @@
     "m1-add": "node m1-add.mjs",
     "verify-route": "node verify-route.mjs",
     "recipe-info": "node recipe-info.mjs",
-    "lint": "eslint analyze.mjs build-csv.mjs select-m1.mjs m1-add.mjs verify-route.mjs recipe-info.mjs compare-route.mjs lib.mjs lib.test.mjs",
-    "typecheck": "node --check analyze.mjs && node --check build-csv.mjs && node --check select-m1.mjs && node --check m1-add.mjs && node --check verify-route.mjs && node --check recipe-info.mjs && node --check compare-route.mjs && node --check lib.mjs && node --check lib.test.mjs",
+    "lint": "eslint analyze.mjs build-csv.mjs select-m1.mjs m1-add.mjs verify-route.mjs recipe-info.mjs compare-route.mjs validate-catalog.mjs lib.mjs lib.test.mjs",
+    "typecheck": "node --check analyze.mjs && node --check build-csv.mjs && node --check select-m1.mjs && node --check m1-add.mjs && node --check verify-route.mjs && node --check recipe-info.mjs && node --check compare-route.mjs && node --check validate-catalog.mjs && node --check lib.mjs && node --check lib.test.mjs",
     "test": "node --test",
-    "compare-route": "node compare-route.mjs"
+    "compare-route": "node compare-route.mjs",
+    "validate-catalog": "node validate-catalog.mjs"
   },
   "dependencies": {
     "@minmax-codex/optimizer": "workspace:*",
