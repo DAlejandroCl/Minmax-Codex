@@ -6,7 +6,11 @@
     "jsx": "react-jsx",
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "types": ["vite/client", "vitest/globals"],
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "@minmax-codex/shared": ["../../packages/shared/src/index.ts"],
+      "@minmax-codex/optimizer": ["../../packages/optimizer/src/index.ts"]
+    }
   },
   "include": ["src", "vite.config.ts"]
 }
