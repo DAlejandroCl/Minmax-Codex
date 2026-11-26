@@ -4,6 +4,8 @@ import { Route, Routes, useLocation } from "react-router";
 import { HomePage } from "./pages/HomePage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 
+const ArmoryPage = lazy(() => import("./pages/ArmoryPage"));
+
 // La calculadora arrastra el optimizador y el Worker: se carga solo al visitar su ruta.
 const CalculatorPage = lazy(() => import("./pages/CalculatorPage"));
 
@@ -34,6 +36,7 @@ export function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/calculadora" element={<CalculatorPage />} />
+        <Route path="/armory" element={<ArmoryPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Suspense>
