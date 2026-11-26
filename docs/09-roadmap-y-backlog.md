@@ -77,6 +77,8 @@ Tamaño: S (≤ 1 día), M (2–3 días), L (≈ 1 semana).
 | H-020 | i18n ES/EN completo y detección de claves faltantes en CI | S | CI falla si falta una clave Parcial: test de paridad de claves ES/EN en `apps/web` (corre en CI); falta cubrir el resto de la app |
 | H-021 | E2E Playwright del flujo CU-09 + Lighthouse CI | M | Flujo feliz y alterno A1 cubiertos |
 
+> **H-010 (hecho):** esquemas en `packages/shared/src/game/` (`battlenet.ts` tolerante, `schemas.ts` estricto, `normalize.ts` sin excepciones, con fuzz). Campos de objeto más allá de id/nombre/precios/binding quedan pendientes de datos reales. `pnpm --filter @minmax-codex/measure validate-catalog` valida el catálogo descargado.
+
 ### R2 (adelanto)
 | ID | Historia | Tam. | Criterio de aceptación |
 |----|----------|------|------------------------|
