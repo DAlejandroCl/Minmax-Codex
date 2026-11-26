@@ -16,9 +16,12 @@ export function HomePage() {
         <LanguageSwitcher />
       </header>
       <p className="text-lg">{t("home.tagline")}</p>
-      <nav aria-label={t("home.navLabel")}>
+      <nav aria-label={t("home.navLabel")} className="flex flex-wrap gap-3">
         <Link to="/calculadora" className="btn btn-primary inline-block no-underline">
           {t("home.openCalculator")}
+        </Link>
+        <Link to="/armory" className="btn inline-block no-underline">
+          {t("home.openArmory")}
         </Link>
       </nav>
     </main>
