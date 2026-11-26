@@ -8,6 +8,8 @@ export const EQUIPMENT_SLOTS = [
   "shoulder",
   "back",
   "chest",
+  "shirt",
+  "tabard",
   "wrist",
   "hands",
   "waist",
@@ -23,6 +25,9 @@ export const EQUIPMENT_SLOTS = [
 ] as const;
 export const EquipmentSlotSchema = z.enum(EQUIPMENT_SLOTS);
 export type EquipmentSlot = z.infer<typeof EquipmentSlotSchema>;
+
+/** Ranuras cosméticas: no cuentan para estadísticas, nivel de objeto medio ni carencias. */
+export const COSMETIC_SLOTS: readonly EquipmentSlot[] = ["shirt", "tabard"];
 
 export const ITEM_QUALITIES = ["poor", "common", "uncommon", "rare", "epic", "legendary"] as const;
 export const ItemQualitySchema = z.enum(ITEM_QUALITIES);
