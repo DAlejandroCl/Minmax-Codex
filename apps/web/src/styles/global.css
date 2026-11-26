@@ -28,6 +28,10 @@
   /* Calidad de objeto: común (vendedor) y raro (subasta). */
   --color-q-common: #ffffff;
   --color-q-rare: #5aa9ff;
+  --color-q-poor: #a0a0a0;
+  --color-q-uncommon: #3be63b;
+  --color-q-epic: #c58cff;
+  --color-q-legendary: #ff9a3c;
 }
 
 @layer base {
