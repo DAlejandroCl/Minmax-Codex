@@ -19,8 +19,8 @@ describe("Armory", () => {
       screen.getByRole("heading", { level: 2, name: "Aldric Vientonorte" }),
     ).toBeInTheDocument();
     const equipment = screen.getByRole("region", { name: "Equipo" });
-    expect(within(equipment).getAllByRole("listitem")).toHaveLength(17);
-    expect(within(equipment).getAllByText("Vacío").length).toBeGreaterThan(0);
+    expect(within(equipment).getAllByRole("button")).toHaveLength(19);
+    expect(within(equipment).getByRole("button", { name: /Camisa: Vacío/ })).toBeInTheDocument();
   });
 
   it("lista las mejoras pendientes", () => {
@@ -28,6 +28,15 @@ describe("Armory", () => {
     const issues = screen.getByRole("region", { name: "Mejoras pendientes" });
     expect(within(issues).getByText("Pecho: falta encantamiento")).toBeInTheDocument();
     expect(within(issues).getByText("Hombros: 1 ranura de gema vacía")).toBeInTheDocument();
+  });
+
+  it("al elegir una ranura muestra su detalle con encantamiento y estadísticas", async () => {
+    setup();
+    await userEvent.click(screen.getByRole("button", { name: /^Hombros: / }));
+    const detail = screen.getByRole("region", { name: "Detalle de Hombros" });
+    expect(within(detail).getByText("Mantle of the Archivist")).toBeInTheDocument();
+    expect(within(detail).getByText("Sin encantamiento")).toBeInTheDocument();
+    expect(within(detail).getByText("16")).toBeInTheDocument();
   });
 
   it("cambia de idioma", async () => {
