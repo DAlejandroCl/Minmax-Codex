@@ -5,3 +5,4 @@ export * from "./game/schemas.js";
 export * from "./game/normalize.js";
 export * from "./character/schemas.js";
 export * from "./character/armory.js";
+export * from "./talents/talents.js";
