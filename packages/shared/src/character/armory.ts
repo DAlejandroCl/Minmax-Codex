@@ -1,4 +1,5 @@
 import {
+  COSMETIC_SLOTS,
   ENCHANTABLE_SLOTS,
   EQUIPMENT_SLOTS,
   STAT_KEYS,
@@ -23,7 +24,7 @@ export interface GearSummary {
 
 /** Slots que se espera tener ocupados (el resto: ranged, trinket2, offhand dependen de la clase/build). */
 const REQUIRED_SLOTS: readonly EquipmentSlot[] = EQUIPMENT_SLOTS.filter(
-  (s) => !["offhand", "ranged", "trinket2"].includes(s),
+  (s) => !["offhand", "ranged", "trinket2", ...COSMETIC_SLOTS].includes(s),
 );
 
 export function addStats(a: Stats, b: Stats): Stats {
@@ -47,6 +48,7 @@ export function summarizeGear(character: Pick<CharacterSnapshot, "equipment">): 
   const totals = Object.fromEntries(STAT_KEYS.map((k) => [k, 0])) as Record<StatKey, number>;
   const issues: GearIssue[] = [];
   let levelSum = 0;
+  let counted = 0;
 
   for (const slot of EQUIPMENT_SLOTS) {
     const item = slots.get(slot);
@@ -54,7 +56,9 @@ export function summarizeGear(character: Pick<CharacterSnapshot, "equipment">): 
       if (REQUIRED_SLOTS.includes(slot)) issues.push({ kind: "empty-slot", slot });
       continue;
     }
+    if (COSMETIC_SLOTS.includes(slot)) continue;
     levelSum += item.itemLevel;
+    counted += 1;
     for (const key of STAT_KEYS) totals[key] += item.stats[key] ?? 0;
     if (ENCHANTABLE_SLOTS.includes(slot) && item.enchant === undefined)
       issues.push({ kind: "missing-enchant", slot });
@@ -63,7 +67,7 @@ export function summarizeGear(character: Pick<CharacterSnapshot, "equipment">): 
   }
 
   return {
-    averageItemLevel: slots.size === 0 ? null : Math.round((levelSum / slots.size) * 10) / 10,
+    averageItemLevel: counted === 0 ? null : Math.round((levelSum / counted) * 10) / 10,
     totals,
     issues,
   };
