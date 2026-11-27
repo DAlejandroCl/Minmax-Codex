@@ -11,6 +11,7 @@
  *   pnpm --filter @minmax-codex/api-probe probe auction --compare     # casas por ruleset
  *   pnpm --filter @minmax-codex/api-probe probe auction --house=110   # una casa (≈ 10 MB)
  *   pnpm --filter @minmax-codex/api-probe probe auction --commodities # solo /commodities de la casa 110
+ *   pnpm --filter @minmax-codex/api-probe probe talents [--limit=N]  # árboles, talentos y medios (iconos) de Forever
  *   pnpm --filter @minmax-codex/api-probe probe discover              # endpoints candidatos por feature
  *   pnpm --filter @minmax-codex/api-probe probe patterns [--details]  # ítems «Recipe», enlace con recetas y requisito de habilidad
  *   pnpm --filter @minmax-codex/api-probe probe -- --ns=dynamic-forever --path=/data/wow/ruleset/index
@@ -719,8 +720,102 @@ async function runPatterns() {
   console.log(`\nResumen: ${join(dir, "patterns-summary.json")}`);
 }
 
+// ───────────────────────────── talents (armory) ─────────────────────────────
+/** Descarga el detalle de un recurso y lo guarda; reanudable: reutiliza lo ya descargado. */
+async function fetchCached(file, path) {
+  const cached = await readJson(file);
+  if (cached) return { body: cached, cached: true };
+  const res = await get(STATIC, path);
+  if (!ok(res)) return { body: null, status: res.status };
+  await saveJson(file, res.body, false);
+  return { body: res.body, cached: false };
+}
+
+/** Busca recursivamente los ids de hechizo (`spell_tooltip.spell.id`, `spell.id`) de un talento. */
+function spellIdsOf(node, out = new Set()) {
+  if (Array.isArray(node)) node.forEach((n) => spellIdsOf(n, out));
+  else if (node && typeof node === "object") {
+    if (node.spell && typeof node.spell.id === "number") out.add(node.spell.id);
+    Object.values(node).forEach((n) => spellIdsOf(n, out));
+  }
+  return out;
+}
+
+async function runTalents() {
+  const dir = join(OUT, "talents");
+  for (const sub of ["trees", "talents", "media"]) await mkdir(join(dir, sub), { recursive: true });
+  const limit = toNumber(flags.limit, Infinity);
+
+  const treeIndex = await get(STATIC, "/data/wow/talent-tree/index");
+  if (!ok(treeIndex)) fail(`No se pudo leer talent-tree/index (HTTP ${treeIndex.status}).`);
+  const treeRefs = (treeIndex.body.spec_talent_trees ?? []).slice(0, limit);
+  console.log(`Árboles: ${treeRefs.length}`);
+
+  const talentIds = new Set();
+  const trees = [];
+  for (const ref of treeRefs) {
+    const id = ref.key?.href?.match(/talent-tree\/(\d+)/)?.[1] ?? ref.id;
+    const r = await fetchCached(join(dir, "trees", `${id}.json`), `/data/wow/talent-tree/${id}`);
+    if (!r.body) {
+      console.log(`${r.status} talent-tree ${id}`);
+      continue;
+    }
+    trees.push({ id, keys: Object.keys(r.body) });
+    const ids = JSON.stringify(r.body).matchAll(/talent\/(\d+)/g);
+    for (const m of ids) talentIds.add(Number(m[1]));
+  }
+
+  const specIndex = await get(STATIC, "/data/wow/playable-specialization/index");
+  if (ok(specIndex)) await saveJson(join(dir, "specializations.json"), specIndex.body, false);
+
+  const index = await get(STATIC, "/data/wow/talent/index");
+  if (ok(index)) for (const t of index.body.talents ?? []) talentIds.add(t.id);
+  const ids = [...talentIds].sort((a, b) => a - b).slice(0, limit);
+  console.log(`Talentos: ${ids.length}`);
+
+  const spells = new Set();
+  const failures = [];
+  for (const [i, id] of ids.entries()) {
+    const r = await fetchCached(join(dir, "talents", `${id}.json`), `/data/wow/talent/${id}`);
+    if (!r.body) {
+      failures.push({ id, status: r.status });
+      continue;
+    }
+    for (const sid of spellIdsOf(r.body)) spells.add(sid);
+    if ((i + 1) % 50 === 0) console.log(`  ${i + 1}/${ids.length} talentos`);
+  }
+
+  let mediaOk = 0;
+  let mediaFail = 0;
+  for (const sid of [...spells].slice(0, limit)) {
+    const r = await fetchCached(join(dir, "media", `${sid}.json`), `/data/wow/media/spell/${sid}`);
+    if (r.body) mediaOk += 1;
+    else mediaFail += 1;
+  }
+
+  const sample = async (sub) => {
+    const files = (await readdir(join(dir, sub))).slice(0, 1);
+    return files.length ? await readJson(join(dir, sub, files[0])) : null;
+  };
+  const summary = {
+    trees: trees.length,
+    talents: ids.length - failures.length,
+    talentFailures: failures.slice(0, 20),
+    spells: spells.size,
+    mediaOk,
+    mediaFail,
+    treeKeys: trees[0]?.keys ?? [],
+    talentKeys: Object.keys((await sample("talents")) ?? {}),
+    mediaKeys: Object.keys((await sample("media")) ?? {}),
+  };
+  await saveJson(join(dir, "talents-summary.json"), summary);
+  console.log(JSON.stringify(summary, null, 2));
+  console.log(`\nResumen: ${join(dir, "talents-summary.json")}`);
+}
+
 const modes = {
   patterns: runPatterns,
+  talents: runTalents,
   discover: runDiscover,
   basic: runBasic,
   custom: runBasic,
@@ -729,6 +824,8 @@ const modes = {
   auction: runAuction,
 };
 if (!modes[mode])
-  fail(`Modo desconocido: ${mode}. Usa basic | catalog | items | auction | discover | patterns.`);
+  fail(
+    `Modo desconocido: ${mode}. Usa basic | catalog | items | auction | discover | patterns | talents.`,
+  );
 await modes[mode]();
 console.log("Recuerda borrar la carpeta out/ al terminar (retención de datos de la API).");
